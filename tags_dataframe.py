@@ -42,11 +42,16 @@ class TagsDataFrame:
             log(f"CSV load failed: {e}")
             df = pd.DataFrame()
 
-        # カラムを定義して調整
-        column_names = ["name", "category", "postCount", "aliases"]
-        df = df.reindex(columns=range(len(column_names)), fill_value="").iloc[:, :len(column_names)]
-        df.columns = column_names
-
+        # 期待するカラム名
+        column_names = ["tag", "category", "postCount", "aliases"]
+        current_cols = min(df.shape[1], len(column_names))
+        df = df.iloc[:, :current_cols] # 余分なカラムは切り捨て
+        df.columns = column_names[:current_cols] # 存在するカラムに名前を割り当て
+        
+        # 足りないカラムを追加(空埋め)
+        for col in column_names[current_cols:]:
+            df[col] = ""
+        
         # エイリアスをリスト化して展開
         df["aliases"] = df["aliases"].fillna("")
         alias_df = df.assign(alias=df["aliases"].str.split(",")).explode("alias")
@@ -59,8 +64,12 @@ class TagsDataFrame:
         # categoryマップをマージ
         category_csv = paths.root_dir / "category_map.csv"
         category_map = pd.read_csv(category_csv)
-        main_df = pd.merge(main_df, category_map, on="category")
-        alias_df = pd.merge(alias_df, category_map, on="category")
+        main_df = pd.merge(main_df, category_map, on="category", how="left")
+        alias_df = pd.merge(alias_df, category_map, on="category", how="left")
+        
+        # 空文字をNoneに置き換え(javascript側の処理の都合上)
+        main_df = main_df.replace("", None)
+        alias_df = alias_df.replace("", None)
 
         return main_df, alias_df
 
@@ -101,9 +110,9 @@ class TagsDataFrame:
     def _format_main_df(df: pd.DataFrame) -> pd.DataFrame:
         """メインタグのデータフレームを整形"""
         return df.assign(
-            term=df["name"],
-            text=df["name"],
-            value=df["name"]
+            term=df["tag"],
+            text=df["tag"],
+            value=df["tag"]
         )[["term", "text", "value", "category", "postCount"]]
 
     @staticmethod
@@ -111,8 +120,8 @@ class TagsDataFrame:
         """エイリアスタグのデータフレームを整形"""
         return alias_df.assign(
             term=alias_df["alias"],
-            text=alias_df.apply(lambda row: f"{row['alias']} => {row['name']}", axis=1),
-            value=alias_df["name"],
+            text=alias_df["alias"] + " => " + alias_df["tag"],
+            value=alias_df["tag"],
             postCount="Alias"
         )[["term", "text", "value", "category", "postCount"]]
 
