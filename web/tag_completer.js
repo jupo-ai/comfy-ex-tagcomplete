@@ -33,7 +33,7 @@ export class TagCompleter {
     constructor(el) {
         this.el = el;
         this.helper = new TextAreaCaretHelper(el, () => app.canvas.ds.scale);
-        this.dropdown = $el("div.tsukihara-tagcomplete");
+        this.dropdown = $el("div.jupo-tagcomplete");
         this.#setup();
         this.#updateDebouncedUpdate();
         TagCompleter.instanceArray.push(this);
@@ -161,11 +161,11 @@ export class TagCompleter {
             parts.push(...this.#createTextParts(info, term));
 
             if (info.postCount) {
-                parts.push($el("span.tsukihara-tagcomplete-pill", { textContent: String(info.postCount) }));
+                parts.push($el("span.jupo-tagcomplete-pill", { textContent: String(info.postCount) }));
             }
 
             if (info.description && info.category !== null) {
-                const description = $el("span.tsukihara-tagcomplete-pill", { textContent: String(info.description) });
+                const description = $el("span.jupo-tagcomplete-pill", { textContent: String(info.description) });
                 const colors = TagCompleter.colors?.[String(info.category)];
                 if (colors) {
                     description.style.setProperty("--pill-bg", colors);
@@ -174,7 +174,7 @@ export class TagCompleter {
             }
 
             if (info.site) {
-                parts.push($el("span.tsukihara-tagcomplete-pill", { textContent: String(info.site) }));
+                parts.push($el("span.jupo-tagcomplete-pill", { textContent: String(info.site) }));
             }
 
             return this.#createDropdownItem(info, term, parts);
@@ -193,7 +193,7 @@ export class TagCompleter {
             ? `https://e621.net/wiki_pages/${linkPart}`
             : `https://danbooru.donmai.us/wiki_pages/${linkPart}`;
 
-        return $el("a.tsukihara-tagcomplete-wikiLink", {
+        return $el("a.jupo-tagcomplete-wikiLink", {
             textContent: "🔍",
             title: "Open external wiki page for this tag.",
             href: href,
@@ -212,21 +212,21 @@ export class TagCompleter {
         splitText.forEach(part => {
             const el = $el("span", { textContent: part });
             if (part.toLowerCase() === term.toLowerCase()) {
-                el.classList.add("tsukihara-tagcomplete-highlight");
+                el.classList.add("jupo-tagcomplete-highlight");
             }
             if (typeof info.postCount === "string") {
                 switch (info.postCount) {
                     case "Alias": 
-                        el.classList.add("tsukihara-tagcomplete-alias");
+                        el.classList.add("jupo-tagcomplete-alias");
                         break;
                     case "Embedding":
-                        el.classList.add("tsukihara-tagcomplete-embeddings");
+                        el.classList.add("jupo-tagcomplete-embeddings");
                         break;
                     case "LoRA":
-                        el.classList.add("tsukihara-tagcomplete-loras");
+                        el.classList.add("jupo-tagcomplete-loras");
                         break;
                     default:
-                        el.classList.add("tsukihara-tagcomplete-extra");
+                        el.classList.add("jupo-tagcomplete-extra");
                 }
             }
             textParts.push(el);
@@ -236,9 +236,9 @@ export class TagCompleter {
     }
 
     #createDropdownItem(info, term, parts) {
-        return $el("div.tsukihara-tagcomplete-item", {
+        return $el("div.jupo-tagcomplete-item", {
             onclick: (e) => {
-                if (e.target.classList.contains("tsukihara-tagcomplete-wikiLink")) return;
+                if (e.target.classList.contains("jupo-tagcomplete-wikiLink")) return;
 
                 this.el.focus();
                 this.prevAllText = this.el.value;
@@ -282,7 +282,7 @@ export class TagCompleter {
     }
 
     #updateItems() {
-        const selectedClassName = "tsukihara-tagcomplete-item--selected";
+        const selectedClassName = "jupo-tagcomplete-item--selected";
         this.items.forEach((item, i) => {
             item.classList.toggle(selectedClassName, this.currentIndex === i);
             if (this.currentIndex === i) {

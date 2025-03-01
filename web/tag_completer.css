@@ -1,5 +1,5 @@
 /* ドロップダウン全体コンテナ */
-.tsukihara-tagcomplete {
+.jupo-tagcomplete {
     color: #e0e0e0;
     background: linear-gradient(135deg, #1a1a1a 0%, #2b2b2b 100%);
     position: absolute;
@@ -14,7 +14,7 @@
 }
 
 /* ドロップダウンアイテム 選択肢コンテナ */
-.tsukihara-tagcomplete-item {
+.jupo-tagcomplete-item {
     cursor: pointer;
     padding: 8px 12px;
     display: flex;
@@ -25,8 +25,8 @@
 }
 
 /* 選択状態（キーボード）とホバー状態（マウス）の共通スタイル */
-.tsukihara-tagcomplete-item--selected,
-.tsukihara-tagcomplete-item:hover {
+.jupo-tagcomplete-item--selected,
+.jupo-tagcomplete-item:hover {
     border-left-color: #d4af37; 
     background: linear-gradient(to right, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.1)); 
     color: #fff;
@@ -37,20 +37,20 @@
 /* ============================================== */
 
 /* ウィキリンクボタン */
-.tsukihara-tagcomplete-wikiLink {
+.jupo-tagcomplete-wikiLink {
     padding: 0.6rem;
     margin: -0.6rem 0 -0.6rem -0.6rem;
     color: #c0c0c0;
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.tsukihara-tagcomplete-wikiLink:hover {
+.jupo-tagcomplete-wikiLink:hover {
     color: #d4af37;
     transform: scale(1.15);
 }
 
 /* タグ名と入力語句との一致部分テキスト */
-.tsukihara-tagcomplete-highlight {
+.jupo-tagcomplete-highlight {
     font-weight: bold;
     text-decoration: underline;
     text-decoration-color: #d4af37;
@@ -61,31 +61,31 @@
 }
 
 /* extraタグの文字色 */
-.tsukihara-tagcomplete-extra {
+.jupo-tagcomplete-extra {
     color: #daa520; 
     
 }
 
 /* aliasタグの文字色 */
-.tsukihara-tagcomplete-alias {
+.jupo-tagcomplete-alias {
     color: #c8c8c8; 
     
 }
 
 /* embeddingsタグの文字色 */
-.tsukihara-tagcomplete-embeddings {
+.jupo-tagcomplete-embeddings {
     color: #6495ed; 
     
 }
 
 /* lorasタグの文字色 */
-.tsukihara-tagcomplete-loras {
+.jupo-tagcomplete-loras {
     color: #ba55d3; 
     
 }
 
 /* 追加情報(postCount, description, site...) */
-.tsukihara-tagcomplete-pill {
+.jupo-tagcomplete-pill {
     margin-left: auto;
     font-size: 11px;
     padding: 4px 8px 4px 16px;
@@ -98,12 +98,12 @@
     transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.tsukihara-tagcomplete-pill:hover {
+.jupo-tagcomplete-pill:hover {
     transform: scale(1.05);
     background: color-mix(in srgb, var(--pill-bg) 80%, white 20%);
 }
 
-.tsukihara-tagcomplete-pill::after {
+.jupo-tagcomplete-pill::after {
     content: "";
     display: block;
     background: color-mix(in srgb, var(--pill-bg) 30%, transparent);
@@ -116,6 +116,6 @@
     z-index: -1;
 }
 
-.tsukihara-tagcomplete-pill + .tsukihara-tagcomplete-pill {
+.jupo-tagcomplete-pill + .jupo-tagcomplete-pill {
     margin-left: 5px;
 }

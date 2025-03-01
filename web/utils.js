@@ -11,7 +11,7 @@ export function debug(data) {
     }
 }
 
-const author = "tsukihara";
+const author = "jupo";
 const packageName = "ExTagComplete";
 
 export function _name(name) {

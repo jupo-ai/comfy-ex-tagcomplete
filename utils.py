@@ -3,7 +3,7 @@ def log(message: str):
     print(f"[tag complete] {message}")
 
 
-author = "tsukihara"
+author = "jupo"
 packageName = "ExTagComplete"
 
 def _name(name):
