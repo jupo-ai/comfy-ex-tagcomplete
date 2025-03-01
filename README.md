@@ -1,5 +1,7 @@
 # ComfyUI-Ex-TagComplete
 
+![capture](assets/capture.webp)
+
 この拡張機能は[ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts)を参考にしています。
 
 また、tagsフォルダ内の
