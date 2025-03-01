@@ -45,7 +45,7 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
   - タグ候補左にwiki (danbooru / e621) へのリンクボタンを追加する
 - **Replace '_' to 'Space'**
   - タグの _ を空白に置き換える
-- ***Completion delay(ms)**
+- **Completion delay(ms)**
   - 入力してからタグ候補を表示するまでの時間
   - 早すぎるとタイピングに検索が追いつかなくて、正しく表示されない
 - **Enable Embeddings**
