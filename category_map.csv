@@ -1,0 +1,17 @@
+category,description,site
+0,General,danbooru
+1,Artist,danbooru
+2,Invalid,danbooru
+3,Copyright,danbooru
+4,Character,danbooru
+5,Meta,danbooru
+6,Invalid,danbooru
+7,General,e621
+8,Artist,e621
+9,Contributor,e621
+10,Copyright,e621
+11,Character,e621
+12,Species,e621
+13,Invalid,e621
+14,Meta,e621
+15,Lore,e621
