@@ -1,0 +1,14 @@
+[project]
+name = "comfy-ex-tagcomplete"
+description = "tag completer with csv file"
+version = "1.0.0"
+license = {file = "LICENSE"}
+
+[project.urls]
+Repository = "https://github.com/jupo-ai/comfy-ex-tagcomplete"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "jupo-ai"
+DisplayName = "comfy-ex-tagcomplete"
+Icon = ""
