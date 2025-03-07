@@ -178,10 +178,10 @@ const restrictAliasSetting = {
 
 function hijackSTRING(app) {
     const STRING = app.widgets.STRING;
-    const SKIP_WIDGETS = new Set(["ttN xyPlot.x_values", "ttN xyPlot.y_values"]);
+    const SKIP_WIDGETS = new Set(["ttN xyPlot.x_values", "ttN xyPlot.y_values", "MathExpression|pysssss.expression"]);
 
     app.widgets.STRING = function(node, inputName, inputData) {
-        const res = STRING.apply(this, arguments);
+        const res = STRING?.apply(this, arguments);
         const widgetData = inputData[1];
 
         if (widgetData?.multiline) {
