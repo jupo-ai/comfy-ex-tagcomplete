@@ -146,15 +146,17 @@ class TagsDataFrame:
 
         # 結果を結合してリスト化
         res = pd.concat([
-            extra_res,
-            extra_alias_res,
             tags_res,
             tags_alias_res,
+            extra_res,
+            extra_alias_res,
             embeddings_res, 
             loras_res, 
-        ])
+        ], ignore_index=True)
+
         # NaNをNoneに変換してJSON互換にする
-        res = res.replace({pd.NA: None, float("nan"): None})
+        res = res.where(pd.notna(res), None)
+        
         return res.to_dict(orient="records")
 
     @staticmethod
@@ -182,7 +184,23 @@ class TagsDataFrame:
                 starts_with = df[df["term"].str.startswith(term, na=False)]
                 contains = df[df["term"].str.contains(term, na=False, regex=False)]
                 contains = contains[~contains.index.isin(starts_with.index)]
-                return pd.concat([starts_with, contains])
+                
+                res =  pd.concat([starts_with, contains])
+
+                def sort_postCount(item):
+                    post_count = item.get("postCount")
+
+                    if isinstance(post_count, int):
+                        return (0, post_count)
+                    else:
+                        return (1, post_count)
+                
+                res = res.sort_values(
+                    by="postCount", 
+                    key=lambda col: col.map(lambda x: sort_postCount({"postCount": x})), 
+                    ascending=False
+                )
+                return res
         except Exception as e:
             log(f"Search failed: {e}")
             return pd.DataFrame()
