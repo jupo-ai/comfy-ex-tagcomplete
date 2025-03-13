@@ -84,10 +84,10 @@ export class TagCompleter {
                     e.preventDefault();
                     break;
             }
-        } else if (e.key === "z" && e.ctrlKey) {
-            this.#undo();
-            e.preventDefault();
-        }
+        } // else if (e.key === "z" && e.ctrlKey) {
+            // this.#undo();
+            // e.preventDefault();
+        // }
     }
 
     async #onInput(e) {
