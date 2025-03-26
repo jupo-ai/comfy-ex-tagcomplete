@@ -1,5 +1,8 @@
 # ComfyUI-Ex-TagComplete
 
+[<img src="https://img.shields.io/badge/lang-Egnlish-red.svg?style=plastic" height="25" />](README.en.md)
+[<img src="https://img.shields.io/badge/言語-日本語-green.svg?style=plastic" height="25" />](README.md)
+
 ![capture](assets/capture.webp)
 
 この拡張機能は[ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts)を参考にしています。
@@ -12,7 +15,6 @@
 
 は[a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete)よりお借りしました。
 
-
 ## Install
 ```
 cd ComfyUI\custom_nodes
@@ -21,6 +23,7 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 
 ## Settings
 ![settings](assets/settings.webp)
+
 - **Enable**
   - 機能の有効化
 - **Tags file**
