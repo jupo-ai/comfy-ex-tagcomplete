@@ -1,4 +1,5 @@
 import { app } from "../../scripts/app.js";
+import {ComfyWidgets} from "../../scripts/widgets.js";
 import { api } from "../../scripts/api.js";
 import { TagCompleter } from "./tag_completer.js";
 import { debug, _name, _endpoint } from "./utils.js";
@@ -176,11 +177,11 @@ const restrictAliasSetting = {
 // STRINGウィジェットのハイジャック
 // ==============================================
 
-function hijackSTRING(app) {
-    const STRING = app.widgets.STRING;
+function hijackSTRING() {
+    const STRING = ComfyWidgets.STRING;
     const SKIP_WIDGETS = new Set(["ttN xyPlot.x_values", "ttN xyPlot.y_values", "MathExpression|pysssss.expression"]);
 
-    app.widgets.STRING = function(node, inputName, inputData) {
+    ComfyWidgets.STRING = function(node, inputName, inputData) {
         const res = STRING?.apply(this, arguments);
         const widgetData = inputData[1];
 
@@ -190,7 +191,7 @@ function hijackSTRING(app) {
 
             const id = `${node.comfyClass}.${inputName}`;
             if (SKIP_WIDGETS.has(id)) return res;
-
+            
             new TagCompleter(res.widget.inputEl);
         }
 
@@ -222,7 +223,7 @@ const tagCompleterExtension = {
         debug("init start");
         await tagsFileSetting.init();
         await extraFileSetting.init();
-        hijackSTRING(app);
+        hijackSTRING();
         debug("init end");
     },
 
