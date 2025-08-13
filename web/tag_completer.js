@@ -84,10 +84,7 @@ export class TagCompleter {
                     e.preventDefault();
                     break;
             }
-        } // else if (e.key === "z" && e.ctrlKey) {
-            // this.#undo();
-            // e.preventDefault();
-        // }
+        }
     }
 
     async #onInput(e) {
@@ -305,14 +302,6 @@ export class TagCompleter {
         this.items = null;
         this.currentIndex = 0;
         this.dropdown.remove();
-    }
-
-    #undo() {
-        if (this.prevAllText !== null) {
-            this.el.value = this.prevAllText;
-            this.prevAllText = null;
-            debug("undo!");
-        }
     }
 
     static updateDelay(value) {
