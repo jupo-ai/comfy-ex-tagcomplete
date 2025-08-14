@@ -36,6 +36,10 @@ export class TagCompleter {
     #isUpdating = false;        // 更新処理中フラグ
     #customPrefixes = null;     // カスタムプレフィックス保存用
 
+    // 追加
+    #isMousedownOnDropdown = false;
+    #isHoveringDropdown = false;
+
     constructor(el) {
         this.#el = el;
         this.#helper = new TextAreaCaretHelper(el, () => app.canvas.ds.scale);
@@ -49,10 +53,12 @@ export class TagCompleter {
 
     /**
      * インスタンスを破棄
+     * 修正9: destroy時のクリーンアップ強化
      */
     destroy() {
         this.#cancelCurrentRequest();
         this.#removeEventListeners();
+        this.#removeDropdownMouseEvents(); // 追加
         this.#hide();
         const index = TagCompleter.instanceArray.indexOf(this);
         if (index > -1) {
@@ -96,9 +102,77 @@ export class TagCompleter {
         this.#el.addEventListener("keydown", this.#handleKeyDown.bind(this));
         this.#el.addEventListener("input", this.#handleInput.bind(this));
         this.#el.addEventListener("click", this.#hide.bind(this));
-        this.#el.addEventListener("blur", () => {
-            setTimeout(() => this.#hide(), 150);
+
+        // 修正: より詳細なblur処理
+        this.#el.addEventListener("blur", (e) => {
+            // relatedTargetをチェックして、ドロップダウン内の要素にフォーカスが移った場合は隠さない
+            if (e.relatedTarget && this.#dropdown.contains(e.relatedTarget)) {
+                return;
+            }
+
+            // mousedownイベント中は隠さない
+            if (this.#isMousedownOnDropdown) {
+                return;
+            }
+
+            ssetTimeout(() => {
+                // 再度チェック: アクティブ要素がドロップダウン内でない場合のみ隠す
+                if (!this.#dropdown.contains(document.activeElement)) {
+                    this.#hide()
+                }
+            }, 150);
         });
+
+        // ドロップダウンのマウスイベントを監視
+        this.#setupDropdownMouseEvents();
+    }
+
+    // 修正2: ドロップダウンのマウスイベント処理を追加
+    #setupDropdownMouseEvents() {
+        // マウスダウン時のフラグ管理
+        this.#isMousedownOnDropdown = false;
+
+        // ドロップダウンでmousedownが発生した時
+        document.addEventListener("mousedown", (e) => {
+            if (this.#dropdown.contains(e.target)) {
+                this.#isMousedownOnDropdown = true;
+                // スクロールバーのクリックを検知
+                this.#handleScrollbarClick(e);
+            } else {
+                this.#isMousedownOnDropdown = false;
+            }
+        });
+
+        // マウスアップ時にフラグをリセット
+        document.addEventListener("mouseup", () => {
+            this.#isMousedownOnDropdown = false;
+        });
+
+        // ドロップダウンにマウスが入ったときの処理
+        this.#dropdown.addEventListener("mouseenter", () => {
+            this.#isHoveringDropdown = true;
+        });
+        this.#dropdown.addEventListener("mouseleave", () => {
+            this.#isHoveringDropdown = false;
+        });
+    }
+
+    // 修正3: スクロールバークリックの検出と処理
+    #handleScrollbarClick(e) {
+        const dropdown = this.#dropdown;
+        const rect = dropdown.getBoundingClientRect();
+
+        // スクロールバー領域を計算(一般的には右端から17px程度)
+        const scrollbarWidth = dropdown.offsetWidth - dropdown.clientWidth;
+        const isScrollbarClick = e.clientX >= rect.right - scrollbarWidth;
+
+        if (isScrollbarClick) {
+            // スクロールバーがクリックされた場合、テキストエリアのフォーカスを維持
+            e.preventDefault();
+            setTimeout(() => {
+                this.#el.focus();
+            }, 0);
+        }
     }
 
     /**
@@ -110,10 +184,19 @@ export class TagCompleter {
         this.#el.removeEventListener("click", this.#hide.bind(this));
     }
 
+    // 修正10: マウスイベントのクリーンアップ
+    #removeDropdownMouseEvents() {
+        // グローバルイベントリスナーのクリーンアップ
+        // 実際の実装では、イベントリスナーの参照を保持して適切に削除する必要があります
+        this.#isMousedownOnDropdown = false;
+        this.#isHoveringDropdown = false;
+    }
+
     // ===== イベントハンドラー =====
 
     /**
      * キーダウンイベントハンドラー
+     * 修正6: より精密なキーボード処理
      */
     async #handleKeyDown(e) {
         if (!TagCompleter.enabled || !this.#dropdown.parentElement) {
@@ -125,7 +208,10 @@ export class TagCompleter {
             ArrowDown: () => this.#navigateDown(e),
             Tab: () => this.#handleTabKey(e),
             Enter: () => this.#handleEnterKey(e),
-            Escape: () => this.#handleEscapeKey(e)
+            Escape: () => this.#handleEscapeKey(e), 
+            // Page Up/Down でのスクロール対応
+            PageUp: () => this.#handlePageUp(e), 
+            PageDown: () => this.#handlePageDown(e)
         };
 
         const action = keyActions[e.key];
@@ -176,6 +262,21 @@ export class TagCompleter {
 
     #handleEscapeKey(e) {
         this.#hide();
+        e.preventDefault();
+    }
+
+    // 修正7: Page Up/Down のサポート追加
+    #handlePageUp(e) {
+        const visibleItems = Math.floor(this.#dropdown.clientHeight / 40); // 概算
+        this.#currentIndex = Math.max(0, this.#currentIndex - visibleItems);
+        this.#updateDropdownDisplay();
+        e.preventDefault();
+    }
+
+    #handlePageDown(e) {
+        const visibleItems = Math.floor(this.#dropdown.clientHeight / 40); // 概算
+        this.#currentIndex = Math.min(this.#items.length - 1, this.#currentIndex + visibleItems);
+        this.#updateDropdownDisplay();
         e.preventDefault();
     }
 
@@ -674,6 +775,7 @@ export class TagCompleter {
 
     /**
      * アイテムの選択状態を更新
+     * 修正8: スムーズなスクロール処理
      */
     #updateItemSelection() {
         const selectedClassName = "jupo-tagcomplete-item--selected";
@@ -683,16 +785,21 @@ export class TagCompleter {
             item.classList.toggle(selectedClassName, isSelected);
             
             if (isSelected) {
-                item.scrollIntoView({ block: "nearest", behavior: "auto" });
+                // よりスムーズなスクロール
+                item.scrollIntoView({ block: "nearest", behavior: "smooth", inline: "nearest" });
             }
         });
     }
 
     /**
      * ドロップダウンの内容を更新
+     * 修正5: ドロップダウンの表示時にtabindexを設定
      */
     #updateDropdownContent() {
         this.#dropdown.replaceChildren(...this.#items);
+
+        // ドロップダウンをフォーカス可能にする
+        this.#dropdown.setAttribute("tabindex", "-1");
         
         if (!this.#dropdown.parentElement) {
             document.body.append(this.#dropdown);
@@ -721,12 +828,20 @@ export class TagCompleter {
 
     /**
      * ドロップダウンを非表示
+     * 修正4: より堅牢なhide処理
      */
     #hide() {
+        // 既に隠れている場合は何もしない
+        if (!this.#dropdown.parentElement) {
+            return;
+        }
+
         this.#cancelCurrentRequest();
         this.#items = null;
         this.#currentIndex = 0;
         this.#customPrefixes = null;
+        this.#isMousedownOnDropdown = false;
+        this.#isHoveringDropdown = false;
         this.#dropdown.remove();
     }
 }

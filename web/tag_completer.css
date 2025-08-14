@@ -11,6 +11,7 @@
     overflow-y: auto;
     max-height: 400px;
     backdrop-filter: blur(6px);
+    pointer-events: auto;
 }
 
 /* ドロップダウンアイテム 選択肢コンテナ */
