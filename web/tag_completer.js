@@ -112,10 +112,11 @@ export class TagCompleter {
 
             // mousedownイベント中は隠さない
             if (this.#isMousedownOnDropdown) {
+                console.log("mouse down now");
                 return;
             }
 
-            ssetTimeout(() => {
+            setTimeout(() => {
                 // 再度チェック: アクティブ要素がドロップダウン内でない場合のみ隠す
                 if (!this.#dropdown.contains(document.activeElement)) {
                     this.#hide()
@@ -550,8 +551,7 @@ export class TagCompleter {
         
         return prefixes.map(prefix => {
             const badge = $el("span.jupo-tagcomplete-prefix-badge", { 
-                textContent: `++${prefix}`,
-                title: `This tag will be prefixed with "${prefix}"`
+                textContent: `++${prefix}`
             });
             
             return badge;
@@ -565,28 +565,6 @@ export class TagCompleter {
         const badge = $el("span.jupo-tagcomplete-category-badge", { 
             textContent: category.toUpperCase() 
         });
-        
-        // カテゴリごとの色設定
-        const categoryColors = {
-            "artist": "#ff6b6b",
-            "character": "#4ecdc4", 
-            "copyright": "#45b7d1",
-            "general": "#96ceb4",
-            "meta": "#feca57",
-            "species": "#ff9ff3",
-            "lore": "#54a0ff",
-            "embedding": "#5f27cd",
-            "lora": "#00d2d3",
-            "alias": "#ff6348"
-        };
-        
-        const color = categoryColors[category.toLowerCase()] || "#gray";
-        badge.style.backgroundColor = color;
-        badge.style.color = "white";
-        badge.style.fontSize = "0.8em";
-        badge.style.padding = "2px 6px";
-        badge.style.borderRadius = "3px";
-        badge.style.marginRight = "4px";
         
         return badge;
     }
@@ -663,9 +641,9 @@ export class TagCompleter {
      * カラーテーマを適用
      */
     #applyColorTheme(element, category) {
-        const colors = TagCompleter.colors?.[String(category)];
-        if (colors) {
-            element.style.setProperty("--pill-bg", colors);
+        const color = TagCompleter.colors?.[String(category)];
+        if (color) {
+            element.style.setProperty("--pill-bg", color);
         }
     }
 

@@ -130,3 +130,13 @@
     margin-right: 4px;
     font-weight: bold;
 }
+
+.jupo-tagcomplete-category-badge {
+    background-color: #4b5dff;
+    color: white;
+    font-size: 0.8em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+    font-weight: bold;
+}
