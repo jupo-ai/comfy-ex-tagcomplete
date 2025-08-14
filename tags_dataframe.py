@@ -61,11 +61,33 @@ class TagsDataFrame:
         main_df = cls._format_main_df(df)
         alias_df = cls._format_alias_df(alias_df)
 
-        # categoryマップをマージ
+        # --- categoryマッピング ---
+        # category_map.csv 読み込み
         category_csv = paths.root_dir / "category_map.csv"
-        category_map = pd.read_csv(category_csv)
-        main_df = pd.merge(main_df, category_map, on="category", how="left")
-        alias_df = pd.merge(alias_df, category_map, on="category", how="left")
+        category_map_df = pd.read_csv(category_csv)
+
+        # dict に変換
+        map_desc = dict(zip(category_map_df["category"], category_map_df["description"]))
+        map_site = dict(zip(category_map_df["category"], category_map_df["site"]))
+
+        def apply_mapping(df_target):
+            # category を文字列化(空はNone)
+            df_target["category"] = df_target["category"].apply(
+                lambda x: str(x).strip() if pd.notna(x) and str(x).strip() else None
+            )
+            # 数値カテゴリだけ description と site をセット
+            df_target["description"] = df_target["category"].apply(
+                lambda x: map_desc.get(int(x)) if x and x.isdigit() 
+                else (x if x else None)
+            )
+            df_target["site"] = df_target["category"].apply(
+                lambda x: map_site.get(int(x)) if x and x.isdigit() else None
+            )
+            return df_target
+        
+        # main_df と alias_df 両方に適用
+        main_df = apply_mapping(main_df)
+        alias_df = apply_mapping(alias_df)
         
         # 空文字をNoneに置き換え(javascript側の処理の都合上)
         main_df = main_df.replace("", None)
@@ -83,8 +105,8 @@ class TagsDataFrame:
             "text": termlist,
             "value": termlist,
             "category": None,
-            "postCount": "Embedding",
-            "description": None,
+            "postCount": None,
+            "description": "Embedding",
             "site": None,
         })
         return embeddings_df
@@ -100,8 +122,8 @@ class TagsDataFrame:
             "text": termlist, 
             "value": valuelist, 
             "category": None, 
-            "postCount": "LoRA", 
-            "description": None, 
+            "postCount": None, 
+            "description": "LoRA", 
             "site": None, 
         })
         return loras_df
@@ -126,7 +148,7 @@ class TagsDataFrame:
         )[["term", "text", "value", "category", "postCount"]]
 
     @classmethod
-    def search(cls, term: str) -> list:
+    def search(cls, term: str, category: str) -> list:
         """
         データフレームから指定されたtermに一致するタグを検索
         
@@ -153,6 +175,11 @@ class TagsDataFrame:
             embeddings_res, 
             loras_res, 
         ], ignore_index=True)
+        
+        # カテゴリ指定がある場合は適用
+        if category:
+            category_lower = str(category).lower()
+            res = res[res["description"].fillna("").str.lower() == category_lower]
 
         # NaNをNoneに変換してJSON互換にする
         res = res.where(pd.notna(res), None)
@@ -190,10 +217,20 @@ class TagsDataFrame:
                 def sort_postCount(item):
                     post_count = item.get("postCount")
 
+                    # Noneや空文字の場合は最低順位
+                    if not post_count:
+                        return (2, 0)
+                    
+                    # 数値の場合は優先度 0 で降順ソート
                     if isinstance(post_count, int):
                         return (0, post_count)
-                    else:
-                        return (1, post_count)
+                    
+                    # 数字っぽい文字列なら変換して扱う
+                    if isinstance(post_count, str) and post_count.isdigit():
+                        return (0, int(post_count))
+                    
+                    # それ以外の場合
+                    return (1, str(post_count))
                 
                 res = res.sort_values(
                     by="postCount", 

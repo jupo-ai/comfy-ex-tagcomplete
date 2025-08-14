@@ -12,8 +12,8 @@ addStylesheet(import.meta.url);
 export class TagCompleter {
     // 静的設定プロパティ
     static enabled = true;
-    static separator = ",";
-    static insertSpace = true;
+    static delimiter = ",";
+    static addSpace = true;
     static insertOnTab = true;
     static insertOnEnter = true;
     static suggestionCount = 20;
@@ -22,21 +22,6 @@ export class TagCompleter {
     static colors = {};
     static delay = 50;
     static instanceArray = [];
-    
-    // カテゴリフィルタリング設定
-    static categoryFilters = {
-        "--general": "general", 
-        "--artist": "artist", 
-        "--copyright": "copyright", 
-        "--character": "character", 
-        "--meta": "meta", 
-        "--contributor": "contributor", 
-        "--species": "species", 
-        "--lore": "lore", 
-        "--embedding": "embedding",
-        "--lora": "lora",
-        "--alias": "alias"
-    };
 
     // インスタンスプロパティ
     #el;                        // 関連するtextarea要素
@@ -44,12 +29,12 @@ export class TagCompleter {
     #dropdown;                  // ドロップダウン要素
     #items = null;              // ドロップダウンの選択肢リスト
     #currentIndex = 0;          // 現在選択中のインデックス
-    #prevAllText = null;        // Undo用に保存する前のテキスト
     #termCursorPosition = null; // term取得時のカーソル位置を保持
     #debouncedUpdate;           // デバウンス処理された更新関数
     #abortController = null;    // 検索リクエストのキャンセル制御
     #requestSequence = 0;       // リクエストの順序制御用
     #isUpdating = false;        // 更新処理中フラグ
+    #customPrefixes = null;     // カスタムプレフィックス保存用
 
     constructor(el) {
         this.#el = el;
@@ -282,7 +267,7 @@ export class TagCompleter {
 
     /**
      * カーソル前の検索用語を取得
-     * カテゴリフィルタープレフィックスの解析も含む
+     * カテゴリフィルタープレフィックスとカスタムプレフィックスの解析も含む
      */
     #getSearchTerm() {
         const beforeCursor = this.#helper.getBeforeCursor();
@@ -298,27 +283,57 @@ export class TagCompleter {
     }
 
     /**
-     * 検索用語を解析してカテゴリフィルターと検索語を分離
+     * 検索用語を解析してカテゴリフィルター複数カスタムプレフィックスと検索語を分離
+     * 順序に関係なく--や++を解析できるように改善
      */
     #parseSearchTerm(rawTerm) {
-        // カテゴリフィルターのチェック
-        for (const [prefix, category] of Object.entries(TagCompleter.categoryFilters)) {
-            if (rawTerm.toLowerCase().startsWith(prefix.toLowerCase())) {
-                const term = rawTerm.slice(prefix.length).trim().replace(/\s/g, "_");
-                return {
-                    term: term || null,
-                    category: category,
-                    prefix: prefix,
-                    fullTerm: rawTerm
-                };
+        let remainingTerm = rawTerm;
+        let customPrefixes = []; // 複数のカスタムプレフィックスを格納
+        let category = null;
+        let categoryPrefix = null;
+
+        // すべてのプレフィックス（++と--）を順序に関係なく抽出
+        while (true) {
+            let foundPrefix = false;
+
+            // カスタムプレフィックス（++）の検出と抽出
+            const customPrefixMatch = remainingTerm.match(/\+\+([^-+\s]+)/);
+            if (customPrefixMatch) {
+                customPrefixes.push(customPrefixMatch[1]);
+                // マッチした部分を削除
+                remainingTerm = remainingTerm.replace(customPrefixMatch[0], '').trim();
+                foundPrefix = true;
+            }
+
+            // カテゴリフィルター（--）の検出と抽出（最初の一つのみ有効）
+            if (!category) {
+                const categoryMatch = remainingTerm.match(/--([a-zA-Z]+)/);
+                if (categoryMatch) {
+                    category = categoryMatch[1].toLowerCase();
+                    categoryPrefix = "--" + category;
+                    // マッチした部分を削除
+                    remainingTerm = remainingTerm.replace(categoryMatch[0], '').trim();
+                    foundPrefix = true;
+                }
+            }
+
+            // 新しいプレフィックスが見つからなかった場合はループを終了
+            if (!foundPrefix) {
+                break;
             }
         }
 
-        // 通常の検索語
+        // 残りの文字列を検索語として処理
+        const searchTerm = remainingTerm.replace(/\s/g, "_").trim();
+
+        // 複数のカスタムプレフィックスを保存（従来の単一プレフィックスとの互換性のため、配列として保存）
+        this.#customPrefixes = customPrefixes.length > 0 ? customPrefixes : null;
+
         return {
-            term: rawTerm.replace(/\s/g, "_"),
-            category: null,
-            prefix: null,
+            term: searchTerm || null,
+            category: category,
+            prefix: categoryPrefix,
+            customPrefixes: customPrefixes.length > 0 ? customPrefixes : null,
             fullTerm: rawTerm
         };
     }
@@ -334,7 +349,7 @@ export class TagCompleter {
         try {
             const requestBody = {
                 term: searchInfo.term,
-                ...(searchInfo.category && { category: searchInfo.category })
+                category: searchInfo.category
             };
 
             const response = await api.fetchApi(_endpoint("search"), {
@@ -349,11 +364,6 @@ export class TagCompleter {
             }
 
             let results = await response.json();
-            
-            // クライアントサイドでのカテゴリフィルタリング（APIが対応していない場合のフォールバック）
-            if (searchInfo.category && results.length > 0) {
-                results = this.#filterResultsByCategory(results, searchInfo.category);
-            }
             
             if (TagCompleter.suggestionCount > 0) {
                 results = results.slice(0, TagCompleter.suggestionCount);
@@ -370,46 +380,6 @@ export class TagCompleter {
         }
     }
 
-    /**
-     * カテゴリによる結果フィルタリング（クライアントサイドフォールバック）
-     */
-    #filterResultsByCategory(results, targetCategory) {
-        return results.filter(item => {
-            // 通常のカテゴリ判定
-            if (item.category !== null && item.category !== undefined) {
-                const categoryMap = {
-                    0: "general",
-                    1: "artist", 
-                    2: "invalid", 
-                    3: "copyright",
-                    4: "character",
-                    5: "meta",
-                    6: "invalid", 
-                    7: "general", 
-                    8: "artist", 
-                    9: "contributor", 
-                    10: "copyright", 
-                    11: "character", 
-                    12: "species", 
-                    13: "invalid", 
-                    14: "meta", 
-                    16: "lore"
-                };
-                
-                const itemCategory = categoryMap[Number(item.category)];
-                return itemCategory === targetCategory.toLowerCase();
-            }
-
-            // postCountが文字列の場合（Embedding, LoRA, Alias等）
-            if (typeof item.postCount === "string") {
-                const postCountLower = item.postCount.toLowerCase();
-                return postCountLower === targetCategory.toLowerCase();
-            }
-            
-            return false;
-        });
-    }
-
     // ===== ドロップダウンアイテム生成 =====
 
     /**
@@ -423,10 +393,16 @@ export class TagCompleter {
     }
 
     /**
-     * アイテムの構成要素を生成
+     * アイテムの構成要素を生成（複数プレフィックス対応版）
      */
     #createItemParts(info, searchInfo) {
         const parts = [];
+
+        // 複数のカスタムプレフィックスがある場合の表示
+        if (searchInfo.customPrefixes && searchInfo.customPrefixes.length > 0) {
+            const prefixBadges = this.#createCustomPrefixBadges(searchInfo.customPrefixes);
+            parts.push(...prefixBadges);
+        }
 
         // カテゴリフィルターが適用されている場合の表示
         if (searchInfo.category) {
@@ -463,6 +439,22 @@ export class TagCompleter {
         }
 
         return parts;
+    }
+
+    /**
+     * 複数のカスタムプレフィックスバッジを生成
+     */
+    #createCustomPrefixBadges(prefixes) {
+        if (!prefixes || prefixes.length === 0) return [];
+        
+        return prefixes.map(prefix => {
+            const badge = $el("span.jupo-tagcomplete-prefix-badge", { 
+                textContent: `++${prefix}`,
+                title: `This tag will be prefixed with "${prefix}"`
+            });
+            
+            return badge;
+        });
     }
 
     /**
@@ -503,6 +495,7 @@ export class TagCompleter {
      */
     #createWikiLink(info) {
         if (info.category === null) return null;
+        if (info.site === null) return null;
 
         const category = Number(info.category) || 0;
         const linkPart = encodeURIComponent(info.value);
@@ -585,31 +578,38 @@ export class TagCompleter {
     }
 
     /**
-     * アイテムクリック処理
+     * アイテムクリック処理（複数プレフィックス対応版）
      */
     #handleItemClick(e, info, searchInfo) {
         if (e.target.classList.contains("jupo-tagcomplete-wikiLink")) return;
 
         this.#el.focus();
-        this.#prevAllText = this.#el.value;
 
         if (this.#termCursorPosition) {
             this.#el.selectionStart = this.#termCursorPosition.start;
             this.#el.selectionEnd = this.#termCursorPosition.end;
         }
 
-        const processedValue = this.#processTagValue(info);
-        const separator = this.#getSeparator(info);
+        let processedValue = this.#processTagValue(info);
+        
+        // 複数のカスタムプレフィックスがある場合は順番に適用
+        if (searchInfo.customPrefixes && searchInfo.customPrefixes.length > 0) {
+            const prefixString = searchInfo.customPrefixes.join(" ") + " ";
+            processedValue = prefixString + processedValue;
+        }
+        
+        const delimiter = this.#getDelimiter(info);
 
-        // プレフィックス付きの場合はフルターム長を使用
-        const replaceLength = searchInfo.prefix ? 
-            -searchInfo.fullTerm.length : 
-            -searchInfo.term.length;
+        // フルタームの長さを使用（プレフィックスを含む全体を置換）
+        const replaceLength = -searchInfo.fullTerm.length;
 
         this.#helper.insertAtCursor(
-            processedValue + separator,
+            processedValue + delimiter,
             replaceLength
         );
+
+        // プレフィックスをクリア
+        this.#customPrefixes = null;
 
         setTimeout(() => this.#hide(), 150);
     }
@@ -632,19 +632,19 @@ export class TagCompleter {
     /**
      * 区切り文字を取得
      */
-    #getSeparator(info) {
+    #getDelimiter(info) {
         const afterCursor = this.#helper.getAfterCursor();
-        const shouldAddSeparator = !afterCursor.trim().startsWith(TagCompleter.separator.trim()) 
+        const shouldAdddelimiter = !afterCursor.trim().startsWith(TagCompleter.delimiter.trim()) 
                                  && info.postCount !== "LoRA";
         
-        if (!shouldAddSeparator) return "";
+        if (!shouldAdddelimiter) return "";
         
-        let separator = TagCompleter.separator;
-        if (separator && TagCompleter.insertSpace) {
-            separator += " ";
+        let delimiter = TagCompleter.delimiter;
+        if (delimiter && TagCompleter.addSpace) {
+            delimiter += " ";
         }
         
-        return separator;
+        return delimiter;
     }
 
     /**
@@ -726,6 +726,7 @@ export class TagCompleter {
         this.#cancelCurrentRequest();
         this.#items = null;
         this.#currentIndex = 0;
+        this.#customPrefixes = null;
         this.#dropdown.remove();
     }
 }

@@ -1,5 +1,5 @@
 import { app } from "../../scripts/app.js";
-import {ComfyWidgets} from "../../scripts/widgets.js";
+import { ComfyWidgets } from "../../scripts/widgets.js";
 import { api } from "../../scripts/api.js";
 import { TagCompleter } from "./tag_completer.js";
 import { debug, _name, _endpoint } from "./utils.js";
@@ -16,9 +16,9 @@ const enableSetting = {
     onChange: (value) => { TagCompleter.enabled = value; },
 };
 
-const tagsFileSetting = {
-    name: "Tags file",
-    id: _name("tagfile"),
+const mainTagsFileSetting = {
+    name: "Main Tags file",
+    id: _name("mainTagsFile"),
     type: "combo",
     defaultValue: "",
     options: [],
@@ -38,9 +38,9 @@ const tagsFileSetting = {
     },
 };
 
-const extraFileSetting = {
-    name: "Extra file",
-    id: _name("extrafile"),
+const extraTagsFileSetting = {
+    name: "Extra Tags file",
+    id: _name("extraTagsFile"),
     type: "combo",
     defaultValue: "",
     options: [],
@@ -60,29 +60,29 @@ const extraFileSetting = {
     },
 };
 
-const separatorSetting = {
-    name: "Separator",
-    id: _name("separator"),
+const delimiterSetting = {
+    name: "Delimiter",
+    id: _name("delimiter"),
     type: "combo",
     defaultValue: ",",
     options: [
-        { text: "comma", value: "," },
-        { text: "period", value: "." },
-        { text: "none", value: "" },
+        { text: "Comma (,)", value: "," },
+        { text: "Period (.)", value: "." },
+        { text: "None", value: "" },
     ],
-    onChange: (value) => { TagCompleter.separator = value; },
+    onChange: (value) => { TagCompleter.delimiter = value; },
 };
 
-const insertSpaceSetting = {
-    name: "Insert 'Space' after separator",
+const addSpaceSetting = {
+    name: "Add 'Space' after delimiter",
     id: _name("insertSpace"),
     type: "boolean",
     defaultValue: true,
-    onChange: (value) => { TagCompleter.insertSpace = value; },
+    onChange: (value) => { TagCompleter.addSpace = value; },
 };
 
 const insertOnTabSetting = {
-    name: "Insert Tag on Tab key",
+    name: "Insert Tag with Tab key",
     id: _name("insertOnTab"),
     type: "boolean",
     defaultValue: true,
@@ -90,7 +90,7 @@ const insertOnTabSetting = {
 };
 
 const insertOnEnterSetting = {
-    name: "Insert Tag on Enter key",
+    name: "Insert Tag with Enter key",
     id: _name("insertOnEnter"),
     type: "boolean",
     defaultValue: true,
@@ -98,12 +98,12 @@ const insertOnEnterSetting = {
 };
 
 const suggestionCountSetting = {
-    name: "Suggestion display count",
+    name: "Max Suggestions to Display",
     id: _name("suggestionCount"),
     type: "slider",
     defaultValue: 20,
-    attrs: { min: 0, max: 50, step: 1 },
-    tooltip: "0: Display all suggestions.",
+    attrs: { min: 0, max: 200, step: 1 },
+    tooltip: "0: Show all available suggestions.",
     onChange: (value) => { TagCompleter.suggestionCount = value; },
 };
 
@@ -112,12 +112,12 @@ const wikiLinkSetting = {
     id: _name("wikiLink"),
     type: "boolean",
     defaultValue: false,
-    tooltip: "Add a 🔍 button that opens the Wiki link",
+    tooltip: "Add a 🔍 button that opens the tag's Wiki page.",
     onChange: (value) => { TagCompleter.wikiLink = value; },
 };
 
 const replaceUnderbarSetting = {
-    name: "Replace '_' to 'Space'",
+    name: "Replace '_' with 'Space'",
     id: _name("replaceUnderbar"),
     type: "boolean",
     defaultValue: true,
@@ -125,7 +125,7 @@ const replaceUnderbarSetting = {
 };
 
 const completionDelaySetting = {
-    name: "Completion delay (ms)",
+    name: "Completion Delay (ms)",
     id: _name("completionDelay"),
     type: "slider",
     defaultValue: 100,
@@ -164,7 +164,7 @@ const restrictAliasSetting = {
     id: _name("restrictAlias"), 
     type: "boolean", 
     defaultValue: false, 
-    tooltip: "If true, display Alias when exact match only.", 
+    tooltip: "If enabled, aliases are only shown when an exact match is found.", 
     onChange: (value) => {
         api.fetchApi(_endpoint("restrictAlias"), {
             method: "POST", 
@@ -221,8 +221,8 @@ const tagCompleterExtension = {
      */
     init: async function(app) {
         debug("init start");
-        await tagsFileSetting.init();
-        await extraFileSetting.init();
+        await mainTagsFileSetting.init();
+        await extraTagsFileSetting.init();
         hijackSTRING();
         debug("init end");
     },
@@ -238,10 +238,10 @@ const tagCompleterExtension = {
         suggestionCountSetting,
         insertOnEnterSetting,
         insertOnTabSetting,
-        insertSpaceSetting,
-        separatorSetting,
-        extraFileSetting,
-        tagsFileSetting,
+        addSpaceSetting,
+        delimiterSetting,
+        extraTagsFileSetting,
+        mainTagsFileSetting,
         enableSetting,
     ],
 
@@ -255,10 +255,10 @@ const tagCompleterExtension = {
         // 設定値を取得
         const settings = app.extensionManager.setting;
         const enabled = settings.get(enableSetting.id);
-        const tagsfile = settings.get(tagsFileSetting.id);
-        const extrafile = settings.get(extraFileSetting.id);
-        const separator = settings.get(separatorSetting.id);
-        const insertSpace = settings.get(insertSpaceSetting.id);
+        const tagsfile = settings.get(mainTagsFileSetting.id);
+        const extrafile = settings.get(extraTagsFileSetting.id);
+        const delimiter = settings.get(delimiterSetting.id);
+        const addSpace = settings.get(addSpaceSetting.id);
         const insertOnTab = settings.get(insertOnTabSetting.id);
         const insertOnEnter = settings.get(insertOnEnterSetting.id);
         const suggestionCount = settings.get(suggestionCountSetting.id);
@@ -271,8 +271,8 @@ const tagCompleterExtension = {
 
         // TagCompleterに設定値を反映
         TagCompleter.enabled = enabled;
-        TagCompleter.separator = separator;
-        TagCompleter.insertSpace = insertSpace;
+        TagCompleter.delimiter = delimiter;
+        TagCompleter.addSpace = addSpace;
         TagCompleter.insertOnTab = insertOnTab;
         TagCompleter.insertOnEnter = insertOnEnter;
         TagCompleter.suggestionCount = suggestionCount;
