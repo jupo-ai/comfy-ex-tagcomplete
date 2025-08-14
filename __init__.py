@@ -110,7 +110,8 @@ async def restrict_alias(request: web.Request):
 async def dataframe_search(request: web.Request):
     data = await request.json()
     term = data.get("term")
-    res = TagsDataFrame.search(term)
+    category = data.get("category")
+    res = TagsDataFrame.search(term, category)
     
     body = json.dumps(res)
     return web.Response(body=body)

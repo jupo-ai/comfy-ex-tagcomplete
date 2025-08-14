@@ -1,66 +1,79 @@
-# ComfyUI-Ex-TagComplete  
+# ComfyUI-Ex-TagComplete
 
-[<img src="https://img.shields.io/badge/lang-Egnlish-red.svg?style=plastic" height="25" />](README.en.md)
+[<img src="https://img.shields.io/badge/lang-English-red.svg?style=plastic" height="25" />](README.en.md)
 [<img src="https://img.shields.io/badge/言語-日本語-green.svg?style=plastic" height="25" />](README.md)
 
-This `README.en.md` is translated by ChatGPT.
+![capture](https://files.catbox.moe/fv292m.webp)
 
-![capture](assets/capture.webp)  
+This extension is based on [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 
-This extension is inspired by [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).  
+Also, the following files in the tags folder:
 
-Additionally, the following files in the `tags` folder:  
+- danbooru.csv
+- danbooru_e621_merged.csv
+- extra-quality-tags.csv
 
-- `danbooru.csv`  
-- `danbooru_e621_merged.csv`  
-- `extra-quality-tags.csv`  
+are borrowed from [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete).
 
-are borrowed from [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete).  
-
-## Install  
+## Install
 ```
-cd ComfyUI\custom_nodes  
-git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git  
-```  
+cd ComfyUI\custom_nodes
+git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
+```
 
-## Settings  
-![settings](assets/settings.webp)  
+## Settings
+![settings](https://files.catbox.moe/0ai9mj.png)
 
-- **Enable**  
-  - Enable or disable the functionality.  
-- **Tags file**  
-  - The main tag CSV file.  
-  - Only files **excluding those starting with "extra"** in the `tags` folder are applicable.  
-- **Extra file**  
-  - Additional tag CSV file.  
-  - Only files **starting with "extra"** in the `tags` folder are applicable.  
-- **Separator**  
-  - The character appended after inserting a tag.  
-  - Choose from comma (,), period (.), or none.  
-- **Insert 'Space' after separator**  
-  - Whether to insert a space after the separator.  
-- **Insert Tag on Tab key**  
-  - Whether to insert a tag when pressing the Tab key.  
-- **Insert Tag on Enter key**  
-  - Whether to insert a tag when pressing the Enter key.  
-- **Suggestion display count**  
-  - The number of suggested tags displayed.  
-  - Setting this to 0 shows all suggestions but may slow performance.  
-- **Add Wiki Link Button**  
-  - Adds a wiki link button (danbooru / e621) next to tag suggestions.  
-- **Replace '_' to 'Space'**  
-  - Replaces underscores (_) in tags with spaces.  
-- **Completion delay (ms)**  
-  - The delay before displaying tag suggestions after typing.  
-  - If set too short, searching may not keep up with typing, leading to incorrect display.  
-- **Enable Embeddings**  
-  - Includes embedding files in tag suggestions.  
-- **Enable LoRAs**  
-  - Includes LoRA files in tag suggestions.  
-- **Restrict Alias**  
-  - If enabled, aliases (e.g., `1girls` → `1girl`) will only be displayed when there is an exact match.  
-  - For example, "1girls" must be fully typed before the alias `1girls → 1girl` appears.  
+- `Enable`
+  - Enable the feature
+- `Main Tags file`
+  - Main tags CSV file
+  - Targets **all CSV files except those starting with 'extra'** in the tags folder
+- `Extra Tags file`
+  - Additional tags CSV file
+  - Targets **only CSV files starting with 'extra'** in the tags folder
+- `Delimiter`
+  - Tag separator character
+  - Choose from comma (,), period (.), or none
+- `Add 'Space' after separator`
+  - Add a space after the separator
+- `Insert Tag on Tab key`
+  - Insert tag with Tab key
+- `Insert Tag on Enter key`
+  - Insert tag with Enter key
+- `Max Suggestions to Display`
+  - Number of tag suggestions to display
+  - 0 displays all but becomes heavy (extremely heavy)
+- `Add Wiki Link Button`
+  - Add wiki (danbooru / e621) link button to the left of tag suggestions
+- `Replace '_' to 'Space'`
+  - Replace underscores in tags with spaces
+- `Completion delay(ms)`
+  - Time before displaying tag suggestions after input
+- `Enable Embeddings`
+  - Include Embedding files in suggestions
+- `Enable LoRAs`
+  - Include LoRA files in suggestions
+- `Restrict Alias`
+  - When ON, Aliases (like 1girls => 1girl) are only displayed on exact match
+  - For example, the alias "1girls => 1girl" will only be displayed when you type up to "1girls"
 
-## ToDo  
-- ~~embeddings~~: done  
-- ~~loras~~: done  
+## Category Filter
+![filter](https://files.catbox.moe/bir330.png)
+
+You can search by specifying categories.  
+Enter `--○○` to specify a category.  
+Available categories are listed in [Category Map](category_map.csv).  
+- Example
+  - `--character fate`
+    - Displays only results with category `character` from the `fate` search results.
+
+## Prefix
+![prefix](https://files.catbox.moe/uddq2d.png)
+
+You can search with prefix settings.  
+Enter `++○○` to set a prefix.  
+Multiple prefixes can be set.  
+- Example
+  - `++pink skirt`
+    - When searching for "skirt" and selecting `pleated skirt`, the result will be `pink pleated skirt`.
