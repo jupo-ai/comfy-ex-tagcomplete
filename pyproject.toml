@@ -3,6 +3,7 @@ name = "comfy-ex-tagcomplete"
 description = "tag completer with csv file"
 version = "1.1.0"
 license = {file = "LICENSE"}
+dependencies = ["pandas"]
 
 [project.urls]
 Repository = "https://github.com/jupo-ai/comfy-ex-tagcomplete"
