@@ -99,7 +99,7 @@ class TagsDataFrame:
     def load_embeddings(cls):
         """embeddingsファイルからデータフレームを作成"""
         embeddings_list = folder_paths.get_filename_list("embeddings")
-        termlist = [f"embedding:{Path(filename).with_suffix("")}" for filename in embeddings_list]
+        termlist = [f"embedding:{Path(filename).with_suffix('')}" for filename in embeddings_list]
         embeddings_df = pd.DataFrame({
             "term": termlist, 
             "text": termlist,
@@ -115,8 +115,8 @@ class TagsDataFrame:
     def load_loras(cls):
         """lorasファイルからデータフレームを作成"""
         loras_list = folder_paths.get_filename_list("loras")
-        termlist = [f"lora:{Path(filename).with_suffix("")}" for filename in loras_list]
-        valuelist = [f"<lora:{Path(filename).with_suffix("")}:1.0>" for filename in loras_list]
+        termlist = [f"lora:{Path(filename).with_suffix('')}" for filename in loras_list]
+        valuelist = [f"<lora:{Path(filename).with_suffix('')}:1.0>" for filename in loras_list]
         loras_df = pd.DataFrame({
             "term": termlist, 
             "text": termlist, 
@@ -241,4 +241,3 @@ class TagsDataFrame:
         except Exception as e:
             log(f"Search failed: {e}")
             return pd.DataFrame()
-
