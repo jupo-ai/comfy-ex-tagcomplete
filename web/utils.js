@@ -1,62 +1,77 @@
-import { $el } from "../../scripts/ui.js";
 import { api } from "../../scripts/api.js";
-
-const DEBUG = false;
-export function debug(data) {
-    if (DEBUG) {
-        api.fetchApi(_endpoint("debug"), {
-            method: "POST", 
-            body: JSON.stringify(data)
-        });
-    }
-}
 
 const author = "jupo";
 const packageName = "ExTagComplete";
 
-export function _name(name) {
+export function mk_name(name) {
     return `${author}.${packageName}.${name}`;
 }
 
-export function _endpoint(part) {
-    return `/${author}/${packageName}/${part}`;
+export function mk_endpoint(url) {
+    return `/${author}/${packageName}/${url}`;
 }
 
-/*
-https://github.com/pythongosssss/ComfyUI-Custom-Scripts/blob/main/web/js/common/utils.js
+export async function api_get(url, { signal } = {}) {
+    const res = await api.fetchApi(mk_endpoint(url), { signal });
+    return await res.json();
+}
 
-MIT License
+export async function api_post(url, options = {}, { signal } = {}) {
+    const body = {
+        method: "POST", 
+        body: JSON.stringify(options), 
+        signal, 
+    };
+    const res = await api.fetchApi(mk_endpoint(url), body);
+    return await res.json();
+}
 
-Copyright (c) 2023 pythongosssss
+export function loadCSS(path, options = {}) {
+    try {
+        const { preventDuplicates = true, onLoad, onError } = options;
+    
+        const normalizedPath = path.endsWith('.js') 
+            ? path.replace(/\.js$/, '.css') 
+            : path;
+        
+        const resolveUrl = (relativePath) => {
+            try {
+                return new URL(relativePath, import.meta.url).toString();
+            } catch (error) {
+                console.warn(`Invalid URL: ${relativePath}`, error);
+                return relativePath;
+            }
+        };
+        
+        const href = normalizedPath.startsWith('http') 
+            ? normalizedPath 
+            : resolveUrl(normalizedPath);
+        
+        if (preventDuplicates) {
+            const existingLink = document.querySelector(`link[rel="stylesheet"][href="${href}"]`);
+            if (existingLink) {
+                return existingLink;
+            }
+        }
+        
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = href;
+        
+        if (onLoad) {
+            link.addEventListener('load', onLoad);
+        }
+        
+        if (onError) {
+            link.addEventListener('error', onError);
+        }
+        
+        document.head.appendChild(link);
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+        return link;
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-export function addStylesheet(url) {
-    if (url.endsWith(".js")) {
-        url = url.substr(0, url.length - 2) + "css";
+    } catch (error) {
+        console.error("Failed to load css: ", error);
     }
-    $el("link", {
-        parent: document.head, 
-        rel: "stylesheet", 
-        type: "text/css", 
-        href: url.startsWith("http") ? url: getUrl(url), 
-    });
 }
-
