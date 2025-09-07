@@ -6,6 +6,11 @@ import { TagCompleter } from "./completer/tag_completer.js";
 // 設定オブジェクト
 // ==============================================
 
+const MAIN_FILES = await api_get("get_main_files")
+const EXTRA_FILES = await api_get("get_extra_files")
+const TRANSLATE_FILES = await api_get("get_translate_files")
+
+
 export const settings = {
     // 登録用のリストを返す
     getList() {
@@ -13,28 +18,6 @@ export const settings = {
             .filter(v => v && typeof v === "object" && !Array.isArray(v))
             .slice()
             .reverse();
-    }, 
-
-    // 各設定の初期化処理
-    async initialize() {
-        for (const setting of this.getList()) {
-            if (typeof setting.init === "function") {
-                await setting.init();
-            }
-        }
-    },
-
-    // セットアップ
-    async setup() {
-        // 初回起動時用にファイルを明示的に読み込む
-        const comfySetting = app.extensionManager.setting;
-        const mainFile = comfySetting.get(this.mainFile.id);
-        const extraFile = comfySetting.get(this.extraFile.id);
-        const translateFile = comfySetting.get(this.translateFile.id);
-
-        await this.mainFile.onChange(mainFile);
-        await this.extraFile.onChange(extraFile);
-        await this.translateFile.onChange(translateFile);
     }, 
 
     // ------------------------------------------
@@ -45,8 +28,9 @@ export const settings = {
         id: mk_name("enable"), 
         type: "boolean", 
         defaultValue: true, 
-        onChange: (value) => {
+        onChange: async (value) => {
             TagCompleter.updateSetting("enable", value);
+            await api_post("toggle_enable", { value: value })
         }, 
     }, 
 
@@ -54,21 +38,10 @@ export const settings = {
         name: "Choose Main File",
         id: mk_name("mainTagsFile"), 
         type: "combo", 
-        defaultValue: "", 
-        options: [], 
+        defaultValue: MAIN_FILES[0], 
+        options: MAIN_FILES, 
         onChange: async (value) => {
-            if (!value) return;
-            await api_post("load_csv", {
-                filename: value, 
-                filetype: "main"
-            });
-        }, 
-        init: async function() {
-            const files = await api_get("get_main_files");
-            if (files.length > 0) {
-                this.options = files.map(file => ({ text: file, value: file }));
-                this.defaultValue = files[0];
-            }
+            await api_post("load_main", { filename: value });
         }, 
     }, 
 
@@ -76,21 +49,10 @@ export const settings = {
         name: "Choose Extra File", 
         id: mk_name("extraTagsFile"), 
         type: "combo", 
-        defaultValue: "", 
-        options: [], 
+        defaultValue: EXTRA_FILES[0], 
+        options: EXTRA_FILES, 
         onChange: async (value) => {
-            if (!value) return;
-            await api_post("load_csv", {
-                filename: value, 
-                filetype: "extra"
-            });
-        }, 
-        init: async function() {
-            const files = await api_get("get_extra_files");
-            if (files.length > 0) {
-                this.options = files.map(file => ({ text: file, value: file }));
-                this.defaultValue = files[0];
-            }
+            await api_post("load_extra", { filename: value });
         }, 
     }, 
 
@@ -98,23 +60,11 @@ export const settings = {
         name: "Choose Translate File", 
         id: mk_name("translateFile"), 
         type: "combo", 
-        defaultValue: "", 
-        options: [], 
+        defaultValue: TRANSLATE_FILES[0], 
+        options: TRANSLATE_FILES, 
         onChange: async (value) => {
-            if (!value) return;
-            const reset = value === "None";
-            await api_post("load_translate", {
-                filename: value, 
-                reset: reset
-            });
-        }, 
-        init: async function() {
-            const files = await api_get("get_translate_files");
-            if (files.length > 0) {
-                this.options = files.map(file => ({ text: file, value: file }));
-                this.defaultValue = files[0];
-            }
-        }, 
+            await api_post("load_translate", { filename: value });
+        },
     }, 
 
     delimiter: {
@@ -150,9 +100,7 @@ export const settings = {
         attrs: { min: 0, max: 200, step: 1 }, 
         tooltip: "0: Show all avaliable suggestion.", 
         onChange: async (value) => {
-            await api_post("set_suggestion_count", {
-                suggestionCount: value
-            });
+            await api_post("set_suggestion_count", { value: value });
         }, 
     }, 
 
@@ -181,7 +129,7 @@ export const settings = {
         name: "Completion Delay (ms)", 
         id: mk_name("completionDelay"), 
         type: "slider", 
-        defaultValue: 100, 
+        defaultValue: 50, 
         attrs: { min: 0, max: 200, step: 10 }, 
         onChange: (value) => {
             TagCompleter.updateSetting("delay", value);
@@ -194,9 +142,7 @@ export const settings = {
         type: "boolean", 
         defaultValue: false, 
         onChange: async (value) => {
-            await api_post("load_embeddings", {
-                enabled: value
-            });
+            await api_post("load_embeddings", { value : value });
         }, 
     }, 
 
@@ -206,9 +152,17 @@ export const settings = {
         type: "boolean", 
         defaultValue: false, 
         onChange: async (value) => {
-            await api_post("load_loras", {
-                enabled: value
-            });
+            await api_post("load_loras", { value: value });
+        }, 
+    }, 
+
+    wildcards: {
+        name: "Enable Wildcards", 
+        id: mk_name("enableWildcards"), 
+        type: "boolean", 
+        defaultValue: false, 
+        onChange: async (value) => {
+            await api_post("load_wildcards", { value: value });
         }, 
     }, 
 
@@ -219,9 +173,7 @@ export const settings = {
         defaultValue: false, 
         tooltip: "If enabled, aliases are only sohwn when an exact match is found.", 
         onChange: async (value) => {
-            await api_post("set_restrict_alias", {
-                enabled: value
-            });
+            await api_post("set_restrict_alias", { value: value });
         }, 
     }, 
 

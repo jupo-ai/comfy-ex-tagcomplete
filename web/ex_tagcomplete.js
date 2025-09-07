@@ -46,7 +46,6 @@ const extension = {
     // 初期化
     // ------------------------------------------
     init: async function(app) {
-        await settings.initialize();
         hijackSTRING();
     },
 
@@ -55,7 +54,6 @@ const extension = {
     // セットアップ
     // ------------------------------------------
     setup: async function(app) {
-        await settings.setup();
     },
 };
 

@@ -52,9 +52,7 @@ export class TextProcessor {
     // 区切り文字を取得
     // ------------------------------------------
     getDelimiter(result, afterCursor) {
-        const shouldAddDelimiter = !afterCursor.trim().startsWith(this.settings.delimiter.trim()) 
-                                    && result.postCount !== "LoRA";
-        
+        const shouldAddDelimiter = !afterCursor.trim().startsWith(this.settings.delimiter.trim());
         if (!shouldAddDelimiter) return "";
 
         let delimiter = this.settings.delimiter;

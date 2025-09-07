@@ -12,6 +12,7 @@ import { VirtualDropdownController } from "./virtual_dropdown_controller.js";
 loadCSS("css/tag_completer.css");
 loadCSS("css/category_pill.css");
 loadCSS("css/custom_badge.css");
+loadCSS("css/specific_text_style.css");
 
 // ==============================================
 // タグ補間機能のメインクラス

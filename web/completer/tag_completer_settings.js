@@ -10,6 +10,6 @@ export const TagCompleterSettings = {
     addSpace: true,  
     replaceUnderbar: true, 
     wikiLink: true, 
-    delay: 100, 
+    delay: 50, 
 }
 

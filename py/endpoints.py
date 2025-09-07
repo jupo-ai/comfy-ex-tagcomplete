@@ -35,67 +35,100 @@ async def get_translate_files(req: web.Request):
     return web.json_response(filelist)
 
 
-# --- CSV ファイル読込 ---
-@Endpoint.post("load_csv")
-async def load_csv(req: web.Request):
-    data = await req.json()
-    filename = data.get("filename")
-    filetype = data.get("filetype")
+# -----------------------------------------------
+# On Change
+# -----------------------------------------------
 
-    TagDataManager.load_csv(filename, filetype)
+# --- Enable切り替え ---
+@Endpoint.post("toggle_enable")
+async def toggle_enble(req: web.Request):
+    data = await req.json()
+    value = data.get("value")
+
+    TagDataManager.toggle_enable(value)
 
     return web.json_response({"status": "success"})
 
 
-# --- Translate ファイル読込 ---
+# --- Main CSV ---
+@Endpoint.post("load_main")
+async def load_main(req: web.Request):
+    data = await req.json()
+    filename = data.get("filename")
+
+    TagDataManager.main_filename = filename
+    TagDataManager.load_main()
+
+    return web.json_response({"status": "success"})
+
+
+# --- Extra CSV ---
+@Endpoint.post("load_extra")
+async def load_extra(req: web.Request):
+    data = await req.json()
+    filename = data.get("filename")
+
+    TagDataManager.extra_filename = filename
+    TagDataManager.load_extra()
+
+    return web.json_response({"status": "success"})
+
+
+# --- Translate ---
 @Endpoint.post("load_translate")
 async def load_translate(req: web.Request):
     data = await req.json()
     filename = data.get("filename")
-    reset = data.get("reset")
 
-    TagDataManager.load_translate(filename, reset)
+    TagDataManager.translate_filename = filename
+    TagDataManager.load_translate()
 
     return web.json_response({"status": "success"})
 
 
-# --- Embeddings読込 ---
+# --- Embeddings ---
 @Endpoint.post("load_embeddings")
 async def load_embeddings(req: web.Request):
     data = await req.json()
-    enabled = data.get("enabled")
+    value = data.get("value")
     
-    files = []
-    if enabled:
-        files = folder_paths.get_filename_list("embeddings")
-    
-    TagDataManager.load_embeddings(files)
+    TagDataManager.enable_embeddings = value
+    TagDataManager.load_embeddings()
 
     return web.json_response({"status": "success"})
 
 
-# --- LoRA読込 ---
+# --- LoRA ---
 @Endpoint.post("load_loras")
 async def load_loras(req: web.Request):
     data = await req.json()
-    enabled = data.get("enabled")
+    value = data.get("value")
 
-    files = []
-    if enabled:
-        files = folder_paths.get_filename_list("loras")
-    
-    TagDataManager.load_loras(files)
+    TagDataManager.enable_loras = value
+    TagDataManager.load_loras()
 
     return web.json_response({"status": "sccuess"})
+
+
+# --- Wildcard ---
+@Endpoint.post("load_wildcards")
+async def load_wildcard(req: web.Request):
+    data = await req.json()
+    value = data.get("value")
+
+    TagDataManager.enable_wildcards = value
+    TagDataManager.load_wildcards()
+
+    return web.json_response({"status": "success"})
 
 
 # --- Suggestion Count設定 --- 
 @Endpoint.post("set_suggestion_count")
 async def set_suggestion_count(req: web.Request):
     data = await req.json()
-    count = data.get("suggestionCount")
+    value = data.get("value")
     
-    TagDataManager.max_count = count
+    TagDataManager.max_count = value
     
     return web.json_response({"status": "success"})
 
@@ -104,9 +137,9 @@ async def set_suggestion_count(req: web.Request):
 @Endpoint.post("set_restrict_alias")
 async def set_restrict_alias(req: web.Request):
     data = await req.json()
-    enabled = data.get("enabled")
+    value = data.get("value")
 
-    TagDataManager.restrictAlias = enabled
+    TagDataManager.restrictAlias = value
     
     return web.json_response({"status": "success"})
 

@@ -107,15 +107,6 @@
     color: #fff;
 }
 
-/* --- 特殊なpostCount時のスタイル --- */
-.jupo-tagcomplete-qualitytag {
-    color: #daa520;
-}
-
-.jupo-tagcomplete-alias {
-    color: #c8c8c8;
-}
-
 /* --- ウィキリンクボタン --- */
 .jupo-tagcomplete-wikiLink {
     padding: 0.6rem;
@@ -143,19 +134,6 @@
     flex-shrink: 0; /* サイズ固定 */
 }
 
-.jupo-tagcomplete-pill::after {
-    content: "";
-    display: block;
-    background: color-mix(in srgb, var(--pill-bg) 30%, transparent);
-    width: calc(100% - 14px);
-    height: 100%;
-    position: absolute;
-    left: 14px;
-    top: 0;
-    border-radius: 14px;
-    z-index: -1;
-}
-
 .jupo-tagcomplete-pill + .jupo-tagcomplete-pill {
-    margin-left: 5px;
+    margin-left: 4px;
 }

@@ -53,7 +53,10 @@ export class DropdownRenderer {
 
         // 翻訳
         if (result.translate) {
-            parts.push(this.createPill(String(result.translate)));
+            String(result.translate).split(",").forEach(translate => {
+                const trimmed = translate.trim();
+                parts.push(this.createPill(trimmed));
+            })
         }
 
         // postCount
@@ -151,13 +154,28 @@ export class DropdownRenderer {
     }
 
     applyTextStyles(element, result) {
-        // postCountが文字列の場合にスタイル適用
+        // postCountもしくはcategoryNameによってテキストスタイルを適用
+        // postCountが数字文字列じゃなくて文字列の場合 -> postCountで適用
+        // postCountがnullもしくは数字文字列の場合 -> categoryNameで適用
         const postCount = result.postCount;
-        if (!postCount) return;
-        if (!isNaN(postCount) && postCount.trim() === "") return;
-
-        const tag = postCount.replace(" ", "").toLowerCase();
-        const className = `jupo-tagcomplete-${tag}`;
+        const categoryName = result.categoryName;
+        
+        let tag;
+        
+        // postCountが存在して、空文字でない、かつ数字以外の場合
+        if (postCount && postCount.trim() !== "" && isNaN(postCount)) {
+            tag = postCount.replace(" ", "").toLowerCase();
+        }
+        // そうでなければcategoryNameを使用
+        else if (categoryName) {
+            tag = categoryName.replace(" ", "").toLowerCase();
+        }
+        // どちらもない場合は何もしない
+        else {
+            return;
+        }
+        
+        const className = `jupo-tagcomplete-text-${tag}`;
         element.classList.add(className);
     }
 
@@ -188,9 +206,23 @@ export class DropdownRenderer {
     // 各行のアイテムを作成
     // ------------------------------------------
     createDropdownItem(result, searchInfo, parts, onItemClick) {
-        return $el("div.jupo-tagcomplete-item", {
+        const item = $el("div.jupo-tagcomplete-item", {
             onclick: (e) => onItemClick(e, result, searchInfo), 
         }, parts);
+
+        // wildcardの場合、アイテムにタイトルをつける
+        this.applyItemTitle(item, result);
+
+        return item;
+    }
+
+    // ------------------------------------------
+    // アイテムタイトル
+    // ------------------------------------------
+    applyItemTitle(element, result) {
+        if (result.categoryName === "Wildcard" && result.wildcardValue) {
+            element.title = result.wildcardValue.replace(/,/g, '\n');
+        }
     }
 
 }

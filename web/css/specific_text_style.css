@@ -1,0 +1,22 @@
+/* --- 特殊なpostCount時のスタイル --- */
+.jupo-tagcomplete-text-qualitytag {
+    color: #daa520;
+}
+
+.jupo-tagcomplete-text-alias {
+    color: #c8c8c8;
+}
+
+
+/* --- categoryNameのスタイル --- */
+.jupo-tagcomplete-text-lora {
+    color: rgba(150, 130, 210, 1);
+}
+
+.jupo-tagcomplete-text-embedding {
+    color: rgba(80, 160, 200, 1);
+}
+
+.jupo-tagcomplete-text-wildcard {
+    color: rgba(200, 150, 255, 1);
+}

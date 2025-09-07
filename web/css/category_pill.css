@@ -40,3 +40,7 @@
 .jupo-tagcomplete-pill-category-embedding {
     --pill-bg: rgba(80, 160, 200, 0.6);
 }
+
+.jupo-tagcomplete-pill-category-wildcard {
+    --pill-bg: rgba(200, 150, 255, 0.6);
+}
