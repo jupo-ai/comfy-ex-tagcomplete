@@ -98,6 +98,5 @@ async def search(req: web.Request):
     filters = data.get("filters")
 
     results = TagDataManager.search(term, filters)
-    print(f"{len(results)}件ヒット")
 
     return web.json_response(results)

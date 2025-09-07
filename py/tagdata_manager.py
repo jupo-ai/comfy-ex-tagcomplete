@@ -220,7 +220,7 @@ class TagDataManager:
                 "text": name, 
                 "value": f"embedding:{name}", 
                 "category": None, 
-                "postCount": "", 
+                "postCount": None, 
                 "categoryName": "Embedding", 
                 "site": None
             })
@@ -238,7 +238,7 @@ class TagDataManager:
                 "text": name, 
                 "value": f"<lora:{name}:1>", 
                 "category": None, 
-                "postCount": "", 
+                "postCount": None, 
                 "categoryName": "LoRA", 
                 "site": None
             })
@@ -280,9 +280,13 @@ class TagDataManager:
             {where_clause}
             ORDER BY 
                 CASE 
-                    WHEN postCount GLOB '[0-9]*' THEN CAST(postCount AS INTEGER) 
-                    ELSE -1 
+                    WHEN postCount GLOB '[0-9]*' THEN CAST(postCount AS INTEGER)
+                    ELSE -1
                 END DESC,
+                CASE 
+                    WHEN postCount GLOB '[0-9]*' THEN ''
+                    ELSE postCount
+                END ASC,
                 term ASC
         '''
         
