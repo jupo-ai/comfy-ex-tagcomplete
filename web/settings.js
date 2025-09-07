@@ -30,9 +30,11 @@ export const settings = {
         const comfySetting = app.extensionManager.setting;
         const mainFile = comfySetting.get(this.mainFile.id);
         const extraFile = comfySetting.get(this.extraFile.id);
+        const translateFile = comfySetting.get(this.translateFile.id);
 
         await this.mainFile.onChange(mainFile);
-        await this.extraFile.onChangeL(extraFile);
+        await this.extraFile.onChange(extraFile);
+        await this.translateFile.onChange(translateFile);
     }, 
 
     // ------------------------------------------
@@ -58,7 +60,7 @@ export const settings = {
             if (!value) return;
             await api_post("load_csv", {
                 filename: value, 
-                isMain: true
+                filetype: "main"
             });
         }, 
         init: async function() {
@@ -76,15 +78,38 @@ export const settings = {
         type: "combo", 
         defaultValue: "", 
         options: [], 
-        onChangeL: async (value) => {
+        onChange: async (value) => {
             if (!value) return;
             await api_post("load_csv", {
                 filename: value, 
-                isMain: false
+                filetype: "extra"
             });
         }, 
         init: async function() {
             const files = await api_get("get_extra_files");
+            if (files.length > 0) {
+                this.options = files.map(file => ({ text: file, value: file }));
+                this.defaultValue = files[0];
+            }
+        }, 
+    }, 
+
+    translateFile: {
+        name: "Choose Translate File", 
+        id: mk_name("translateFile"), 
+        type: "combo", 
+        defaultValue: "", 
+        options: [], 
+        onChange: async (value) => {
+            if (!value) return;
+            const reset = value === "None";
+            await api_post("load_translate", {
+                filename: value, 
+                reset: reset
+            });
+        }, 
+        init: async function() {
+            const files = await api_get("get_translate_files");
             if (files.length > 0) {
                 this.options = files.map(file => ({ text: file, value: file }));
                 this.defaultValue = files[0];

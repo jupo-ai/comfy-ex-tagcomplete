@@ -29,6 +29,7 @@ class TagDataManager:
     # -------------------------------------------
     @classmethod
     def init_db(cls):
+        
         cls.conn = sqlite3.connect(':memory:')
         cls.conn.execute('''
             CREATE TABLE tags (
@@ -38,7 +39,8 @@ class TagDataManager:
                 category TEXT,
                 postCount TEXT,
                 categoryName TEXT,
-                site TEXT
+                site TEXT,
+                translate TEXT
             )
         ''')
         # インデックス作成で検索高速化
@@ -74,20 +76,41 @@ class TagDataManager:
     # CSV読込
     # -------------------------------------------
     @classmethod
-    def load_csv(cls, filename, is_main):
+    def load_csv(cls, filename, filetype):
+        if filename == "None": return
+        
         csv_path = paths.tags_dir / filename
         
         with open(csv_path, mode="r", encoding="utf-8") as file:
             reader = csv.reader(file)
             rows = [row for row in reader if row] # 空行除去
-            parsed = cls.parse_csv(rows)
         
-        if is_main:
-            cls.main_data = parsed
+        if filetype == "main":
+            cls.main_data = cls.parse_csv(rows)
+        elif filetype == "extra":
+            cls.extra_data = cls.parse_csv(rows)
         else:
-            cls.extra_data = parsed
+            print(f"Invalid file type: {filetype}")
         
         cls.update_all_data()
+
+
+    # -------------------------------------------
+    # Translate読込
+    # -------------------------------------------
+    @classmethod
+    def load_translate(cls, filename, reset):
+        if reset:
+            cls.reset_translate()
+            return
+        
+        file_path = paths.translate_dir / filename
+        
+        with open(file_path, mode="r", encoding="utf-8") as file:
+            reader = csv.reader(file)
+            rows = [row for row in reader if row]
+        
+        cls.apply_translate(rows)
     
     
     # -------------------------------------------
@@ -140,8 +163,8 @@ class TagDataManager:
         for item in data:
             if item and item.get("term"):
                 cls.conn.execute('''
-                    INSERT INTO tags (term, text, value, category, postCount, categoryName, site)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO tags (term, text, value, category, postCount, categoryName, site, translate)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     item.get("term"),
                     item.get("text"),
@@ -149,7 +172,8 @@ class TagDataManager:
                     item.get("category"),
                     item.get("postCount"),
                     item.get("categoryName"),
-                    item.get("site")
+                    item.get("site"),
+                    item.get("translate")
                 ))
         cls.conn.commit()
     
@@ -182,6 +206,7 @@ class TagDataManager:
                 "value": tag, 
                 "category": category if category else None, 
                 "postCount": postCount if postCount else None, 
+                "translate": None,
             }
             data.append(main_entry)
 
@@ -195,6 +220,7 @@ class TagDataManager:
                             "value": tag, 
                             "category": category if category else None, 
                             "postCount": "Alias", 
+                            "translate": None,
                         }
                         data.append(alias_entry)
         
@@ -222,7 +248,8 @@ class TagDataManager:
                 "category": None, 
                 "postCount": None, 
                 "categoryName": "Embedding", 
-                "site": None
+                "site": None, 
+                "translate": None, 
             })
         
         return data
@@ -240,11 +267,47 @@ class TagDataManager:
                 "category": None, 
                 "postCount": None, 
                 "categoryName": "LoRA", 
-                "site": None
+                "site": None, 
+                "translate": None, 
             })
         
         return data
     
+    
+    # -------------------------------------------
+    # Translate適用
+    # -------------------------------------------
+    @classmethod
+    def apply_translate(cls, rows: list[list[str]]):
+        cls.reset_translate() # リセットしてから
+
+        for row in rows:
+            if len(row) < 2:
+                continue
+            
+            tag = row[0]
+            translate_str = row[-1]
+            
+            if not tag or not translate_str:
+                continue
+            
+            cls.conn.execute('''
+                UPDATE tags 
+                SET translate = ?
+                WHERE term = ?
+            ''', (translate_str, tag))
+        
+        cls.conn.commit()
+    
+    
+    @classmethod
+    def reset_translate(cls):
+        if cls.conn is None:
+            return
+        
+        # translateカラムを全てNULLにリセット
+        cls.conn.execute('UPDATE tags SET translate = NULL')
+        cls.conn.commit()
     
     
     # -------------------------------------------
@@ -258,12 +321,12 @@ class TagDataManager:
         # restrictAliasがtrueの場合の条件
         if cls.restrictAlias:
             # Aliasではないデータ、またはAliasで完全一致するデータのみ
-            where_clause = "WHERE (postCount != 'Alias' OR (postCount = 'Alias' AND term = ?)) AND term LIKE '%' || ? || '%'"
-            params = [term, term]
+            where_clause = "WHERE (postCount != 'Alias' OR (postCount = 'Alias' AND (term = ? OR translate = ?))) AND (term LIKE '%' || ? || '%' OR translate LIKE '%' || ? || '%')"
+            params = [term, term, term, term]
         else:
-            # 通常の部分一致検索
-            where_clause = "WHERE term LIKE '%' || ? || '%'"
-            params = [term]
+            # 通常の部分一致検索（termまたはtranslateで検索）
+            where_clause = "WHERE (term LIKE '%' || ? || '%' OR translate LIKE '%' || ? || '%')"
+            params = [term, term]
         
         # カテゴリフィルタ（複数対応）- categoryNameで検索
         if category and len(category) > 0:
@@ -275,7 +338,7 @@ class TagDataManager:
         
         # postCountでソート（数字変換可能なら大きい順、そうでなければ末尾）
         query = f'''
-            SELECT term, text, value, category, postCount, categoryName, site 
+            SELECT term, text, value, category, postCount, categoryName, site, translate 
             FROM tags 
             {where_clause}
             ORDER BY 
@@ -306,7 +369,8 @@ class TagDataManager:
                 "category": row[3],
                 "postCount": row[4],
                 "categoryName": row[5],
-                "site": row[6]
+                "site": row[6], 
+                "translate": row[7], 
             })
         
         return results

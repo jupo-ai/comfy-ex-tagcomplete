@@ -25,15 +25,36 @@ async def get_extra_files(req: web.Request):
 
     return web.json_response(filelist)
 
+# --- translate ファイルリストを取得 ---
+@Endpoint.get("get_translate_files")
+async def get_translate_files(req: web.Request):
+    files = paths.translate_dir.glob("*.csv")
+    filelist = [file.name for file in files]
+    filelist = ["None"] + filelist
+    
+    return web.json_response(filelist)
+
 
 # --- CSV ファイル読込 ---
 @Endpoint.post("load_csv")
 async def load_csv(req: web.Request):
     data = await req.json()
     filename = data.get("filename")
-    is_main = data.get("isMain")
+    filetype = data.get("filetype")
 
-    TagDataManager.load_csv(filename, is_main)
+    TagDataManager.load_csv(filename, filetype)
+
+    return web.json_response({"status": "success"})
+
+
+# --- Translate ファイル読込 ---
+@Endpoint.post("load_translate")
+async def load_translate(req: web.Request):
+    data = await req.json()
+    filename = data.get("filename")
+    reset = data.get("reset")
+
+    TagDataManager.load_translate(filename, reset)
 
     return web.json_response({"status": "success"})
 

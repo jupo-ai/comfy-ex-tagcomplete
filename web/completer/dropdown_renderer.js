@@ -51,6 +51,11 @@ export class DropdownRenderer {
         // テキスト部分
         parts.push(this.createTextParts(result, searchInfo.term));
 
+        // 翻訳
+        if (result.translate) {
+            parts.push(this.createPill(String(result.translate)));
+        }
+
         // postCount
         if (result.postCount) {
             parts.push(this.createPill(String(result.postCount)));
