@@ -1,0 +1,46 @@
+/* --- カテゴリ名ピル --- */
+.jupo-tagcomplete-pill-category-general {
+    --pill-bg: rgba(100, 160, 255, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-artist {
+    --pill-bg: rgba(220, 100, 120, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-copyright {
+    --pill-bg: rgba(160, 120, 200, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-character {
+    --pill-bg: rgba(100, 180, 140, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-contributor {
+    --pill-bg: rgba(240, 190, 90, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-species {
+    --pill-bg: rgba(255, 170, 140, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-meta {
+    --pill-bg: rgba(120, 120, 120, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-lore {
+    --pill-bg: rgba(120, 170, 150, 0.6);
+}
+
+
+
+.jupo-tagcomplete-pill-category-lora {
+    --pill-bg: rgba(150, 130, 210, 0.6); 
+}
+
+.jupo-tagcomplete-pill-category-embedding {
+    --pill-bg: rgba(80, 160, 200, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-wildcard {
+    --pill-bg: rgba(200, 150, 255, 0.6);
+}
