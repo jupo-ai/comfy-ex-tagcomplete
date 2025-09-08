@@ -32,6 +32,8 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 - `Extra Tags file`
   - Additional tags CSV file
   - Targets **only CSV files starting with 'extra'** in the tags folder
+- `Translate file` ⭐new
+  - Set a translation file
 - `Delimiter`
   - Tag separator character
   - Choose from comma (,), period (.), or none
@@ -43,7 +45,7 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
   - Insert tag with Enter key
 - `Max Suggestions to Display`
   - Number of tag suggestions to display
-  - 0 displays all but becomes heavy (extremely heavy)
+  - 0 displays all ~~but becomes heavy (extremely heavy)~~
 - `Add Wiki Link Button`
   - Add wiki (danbooru / e621) link button to the left of tag suggestions
 - `Replace '_' to 'Space'`
@@ -54,6 +56,8 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
   - Include Embedding files in suggestions
 - `Enable LoRAs`
   - Include LoRA files in suggestions
+- `Enable Wildcards` ⭐new
+  - Include wildcards in suggestions
 - `Restrict Alias`
   - When ON, Aliases (like 1girls => 1girl) are only displayed on exact match
   - For example, the alias "1girls => 1girl" will only be displayed when you type up to "1girls"

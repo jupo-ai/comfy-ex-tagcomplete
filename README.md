@@ -1,6 +1,6 @@
 # ComfyUI-Ex-TagComplete
 
-[<img src="https://img.shields.io/badge/lang-Egnlish-red.svg?style=plastic" height="25" />](README.en.md)
+[<img src="https://img.shields.io/badge/lang-English-red.svg?style=plastic" height="25" />](README.en.md)
 [<img src="https://img.shields.io/badge/言語-日本語-green.svg?style=plastic" height="25" />](README.md)
 
 ![capture](https://files.catbox.moe/fv292m.webp)
@@ -32,6 +32,8 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 - `Extra Tags file`
   - 追加タグのcsvファイル
   - tagsフォルダ内の **extraで始まるcsvのみ** が対象
+- `Translate file` ⭐new
+  - 翻訳ファイルを設定します
 - `Delimiter`
   - タグの区切り文字
   - カンマ(,) ピリオド(.) none(なし) から選択
@@ -43,7 +45,7 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
   - Enter キーで挿入する
 - `Max Suggestions to Display`
   - タグ候補の表示数
-  - 0で全て表示するが重くなる(めちゃくちゃ重い)
+  - 0で全て表示する~~が重くなる(めちゃくちゃ重い)~~
 - `Add Wiki Link Button`
   - タグ候補左にwiki (danbooru / e621) へのリンクボタンを追加する
 - `Replace '_' to 'Space'`
@@ -54,6 +56,8 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
   - Embeddingファイルも候補に含める
 - `Enable LoRAs`
   - LoRAファイルも候補に含める
+- `Enable Wildcards`⭐new
+  - ワイルドカードも候補に含める
 - `Restrict Alias`
   - ONにすると、Alias(1girls => 1girlなど)が完全一致の場合のみ表示される
   - 例えば、1girlsまで入力しないと「1girls => 1girl」のAliasは表示されない
