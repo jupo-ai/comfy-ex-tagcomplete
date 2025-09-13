@@ -374,7 +374,9 @@ class TagDataManager:
     @classmethod
     def parse_wildcards(cls):
         data = []
-        for key, value in WildcardLoader.wildcards.items():
+        wildcards = WildcardLoader.get_wildcards_dict()
+        for key, value in wildcards.items():
+            key = f"__{key}__"
             data.append({
                 "term": key, 
                 "text": key, 
