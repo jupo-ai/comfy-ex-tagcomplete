@@ -284,20 +284,17 @@ export class VirtualDropdownController {
         this.startIndex = 0;
         this.endIndex = Math.min(this.visibleCount + this.bufferSize * 2 - 1, this.allItems.length - 1);
         
-        // ビューポート高さを実際のアイテム数に応じて調整
-        const viewportHeight = this.calculateViewportHeight();
-        this.viewport.style.height = `${viewportHeight}px`;
-        
         // 全体の高さ設定
         const totalHeight = this.allItems.length * this.itemHeight;
         this.container.style.height = `${totalHeight}px`;
-        
-        this.updateVisibleItems();
-        this.updateDropdownPosition(position);
-        
+
+        // 先にDOMに追加してサイズ計算を可能にする
         if (!this.dropdown.parentElement) {
             document.body.append(this.dropdown);
         }
+        
+        this.updateVisibleItems();
+        this.updateDropdownPosition(position);
     }
 
     // ------------------------------------------
@@ -305,6 +302,13 @@ export class VirtualDropdownController {
     // ------------------------------------------
     hide() {
         if (!this.dropdown.parentElement) return;
+        
+        // スタイルをリセットして、次回表示時に影響が出ないようにする
+        this.viewport.style.height = "";
+        this.viewport.style.maxHeight = "";
+        this.container.style.height = "";
+        this.dropdown.style.left = "";
+        this.dropdown.style.top = "";
         
         this.allItems = [];
         this.visibleItems = [];
@@ -518,21 +522,33 @@ export class VirtualDropdownController {
     updateDropdownPosition(position) {
         if (!position) return;
         
-        this.dropdown.style.left = `${position.left ?? 0}px`;
-        this.dropdown.style.top = `${position.top ?? 0}px`;
-        
-        // 画面からはみ出さないよう調整
+        // 垂直方向の調整
         const maxHeight = window.innerHeight - position.top - 20;
         const idealHeight = this.calculateViewportHeight();
-        
-        // 実際のアイテム数とウィンドウサイズを考慮した最適な高さ
         const finalHeight = Math.min(maxHeight, idealHeight);
+        
         this.viewport.style.maxHeight = `${finalHeight}px`;
         
         // アイテム数が少ない場合は高さを固定
         if (this.allItems.length <= this.visibleCount) {
             this.viewport.style.height = `${finalHeight}px`;
         }
+
+        // 水平方向の調整
+        const dropdownWidth = this.dropdown.offsetWidth;
+        const windowWidth = window.innerWidth;
+        let newLeft = position.left ?? 0;
+
+        // 右端が画面外にはみ出す場合、位置を調整
+        if (newLeft + dropdownWidth > windowWidth) {
+            newLeft = windowWidth - dropdownWidth - 10; // 10pxの右マージン
+        }
+
+        // 左端が画面外にはみ出さないようにする
+        newLeft = Math.max(10, newLeft); // 10pxの左マージン
+
+        this.dropdown.style.left = `${newLeft}px`;
+        this.dropdown.style.top = `${position.top ?? 0}px`;
     }
 
     // ------------------------------------------
