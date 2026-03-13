@@ -212,6 +212,8 @@ export class TextAreaCaretHelper {
            this.el.selectionStart = startPos + offset;
            this.el.setRangeText(value, this.el.selectionStart, endPos, "end");
            this.el.selectionStart = this.el.selectionEnd = startPos + value.length + offset + (finalOffset ?? 0);
+
+           this.el.dispatchEvent(new Event("input", { bubbles: true }));
        } else {
            console.warn("selectionStart が取得できませんでした");
            this.el.value += value;
