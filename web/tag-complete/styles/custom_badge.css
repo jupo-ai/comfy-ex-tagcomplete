@@ -17,3 +17,18 @@
     margin-right: 4px;
     font-weight: bold;
 }
+
+.jupo-tagcomplete-aliasButton {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    font-size: 11px;
+    line-height: 1;
+    padding: 3px 5px;
+    cursor: pointer;
+}
+
+.jupo-tagcomplete-aliasButton:hover {
+    background: rgba(255, 255, 255, 0.16);
+}

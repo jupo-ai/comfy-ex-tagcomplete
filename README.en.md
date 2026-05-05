@@ -5,79 +5,101 @@
 
 ![capture](https://files.catbox.moe/fv292m.webp)
 
+This extension adds tag autocomplete to text input fields in ComfyUI.  
+In addition to tag CSV files, it can also include translation files, Embeddings, LoRAs, and Wildcards in suggestions.
+
 This extension is based on [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 
-Also, the following files in the tags folder:
+## Features
 
-- danbooru.csv
-- danbooru_e621_merged.csv
-- extra-quality-tags.csv
+- Tag autocomplete using CSV files
+- Translation-aware search and translation display
+- Suggestions for Embeddings, LoRAs, and Wildcards
+- Category-based filtering
+- Prefix insertion
+- Wiki link button for tags
 
-are borrowed from [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete).
+## Installation
 
-## Install
-```
-cd ComfyUI\custom_nodes
+```bash
+cd ComfyUI/custom_nodes
 git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 ```
 
+No additional `pip` dependencies are required.
+
+## Usage
+
+After installation, start ComfyUI and autocomplete will be available in supported multiline text inputs.  
+You can configure the behavior from the ComfyUI settings panel.
+
 ## Settings
+
 ![settings](https://files.catbox.moe/0ai9mj.png)
 
-- `Enable`
-  - Enable the feature
-- `Main Tags file`
-  - Main tags CSV file
-  - Targets **all CSV files except those starting with 'extra'** in the tags folder
-- `Extra Tags file`
-  - Additional tags CSV file
-  - Targets **only CSV files starting with 'extra'** in the tags folder
-- `Translate file` ⭐new
-  - Set a translation file
-- `Delimiter`
-  - Tag separator character
-  - Choose from comma (,), period (.), or none
-- `Add 'Space' after separator`
-  - Add a space after the separator
-- `Insert Tag on Tab key`
-  - Insert tag with Tab key
-- `Insert Tag on Enter key`
-  - Insert tag with Enter key
-- `Max Suggestions to Display`
-  - Number of tag suggestions to display
-  - 0 displays all ~~but becomes heavy (extremely heavy)~~
-- `Add Wiki Link Button`
-  - Add wiki (danbooru / e621) link button to the left of tag suggestions
-- `Replace '_' to 'Space'`
-  - Replace underscores in tags with spaces
-- `Completion delay(ms)`
-  - Time before displaying tag suggestions after input
-- `Enable Embeddings`
-  - Include Embedding files in suggestions
-- `Enable LoRAs`
-  - Include LoRA files in suggestions
-- `Enable Wildcards` ⭐new
-  - Include wildcards in suggestions
-- `Restrict Alias`
-  - When ON, Aliases (like 1girls => 1girl) are only displayed on exact match
-  - For example, the alias "1girls => 1girl" will only be displayed when you type up to "1girls"
+| Setting | Description |
+| --- | --- |
+| `Enable` | Turns the feature on or off. |
+| `Choose Main File` | Selects the main tag CSV file. Targets CSV files in the `tags` folder that do not start with `extra`. |
+| `Choose Extra File` | Selects an additional tag CSV file. Targets CSV files in the `tags` folder that start with `extra`. |
+| `Choose Translate File` | Selects a translation CSV file from the `translate` folder. Choose `None` to disable translation support. |
+| `Delimiter` | Sets the separator used when inserting tags. Choose from `,`, `.`, or `None`. |
+| `Add 'Space' after delimiter` | Automatically inserts a space after the delimiter. |
+| `Max Suggestions to Display` | Sets the maximum number of suggestions to show. `0` shows all results, which may become heavy with large datasets. |
+| `Add 🔍 Link button` | Shows a button next to each suggestion that opens the related wiki or tag page. |
+| `Wiki Link Site` | Chooses which site the `🔍` button opens. `Auto` uses the source site of the tag when available. |
+| `Replace '_' with 'Space'` | Replaces `_` with spaces when inserting tags. |
+| `Artist Tag Prefix` | Adds a prefix before inserted artist tags. Example: `@` |
+| `Completion Delay (ms)` | Wait time before suggestions appear after typing. |
+| `Enable Embeddings` | Includes Embeddings in the suggestion list. They are shown as `embedding:name`. |
+| `Enable LoRAs` | Includes LoRAs in the suggestion list. They are inserted as `<lora:name:1>`. |
+| `Enable Wildcards` | Includes Wildcards in the suggestion list. They are shown as `__name__`. |
+| `Restrict Alias` | Shows alias entries only on exact match. For example, `1girls -> 1girl` appears only after typing `1girls`. |
+| `Search Method` | Switches how matching works. `smart` splits the input by spaces and `_`, then searches for tags containing all chunks. `legacy` treats the whole input as a single pattern and searches with a `%term%` style partial match. |
+| `Sort Method` | Switches how results are ordered. `relevance` prioritizes exact matches, then prefix matches, then partial matches, and uses `postCount` and tag length as tie-breakers. `legacy` does not consider match position or match strength and mainly sorts by `postCount`. |
 
-## Category Filter
+## Search Syntax
+
+### Category Filter
+
 ![filter](https://files.catbox.moe/bir330.png)
 
-You can search by specifying categories.  
-Enter `--○○` to specify a category.  
-Available categories are listed in [Category Map](category_map.csv).  
-- Example
-  - `--character fate`
-    - Displays only results with category `character` from the `fate` search results.
+You can narrow results by category with `--category`.  
+Available categories are listed in [category_map.csv](category_map.csv).
 
-## Prefix
+Example:
+
+```text
+--character fate
+```
+
+This shows only `character` entries from the results for `fate`.
+
+### Prefix
+
 ![prefix](https://files.catbox.moe/uddq2d.png)
 
-You can search with prefix settings.  
-Enter `++○○` to set a prefix.  
-Multiple prefixes can be set.  
-- Example
-  - `++pink skirt`
-    - When searching for "skirt" and selecting `pleated skirt`, the result will be `pink pleated skirt`.
+Use `++text` to prepend text before the selected tag when inserting it.  
+You can use multiple prefixes.
+
+Example:
+
+```text
++pink skirt
+```
+
+If you search for `skirt` and select `pleated skirt`, the inserted result becomes `pink pleated skirt`.
+
+## Bundled Data
+
+The following 3 files in the `tags` folder are borrowed from [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete):
+
+- `danbooru.csv`
+- `danbooru_e621_merged.csv`
+- `extra-quality-tags.csv`
+
+## Notes
+
+- Translation CSV files are read as `first column: tag`, `last column: translated text`.
+- Wildcard suggestions are loaded from the Wildcard definitions available to ComfyUI.
+- Autocomplete is disabled for some multiline inputs for compatibility reasons.

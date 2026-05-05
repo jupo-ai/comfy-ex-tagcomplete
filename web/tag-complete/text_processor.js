@@ -32,19 +32,39 @@ export class TextProcessor {
     processTagValue(result, searchInfo) {
         let value = result.value;
 
+        value = this.applyCategoryPrefix(value, result);
+
         // 複数のカスタムプレフィックスがある場合は順番に適用
         if (searchInfo.customPrefixes && searchInfo.customPrefixes.length > 0) {
             const prefixString = searchInfo.customPrefixes.join(" ") + " ";
             value = prefixString + value;
         }
 
-        // 通常のタグの場合のみエスケープやリプレイス処理
-        if (result.category !== null) {
+        // 通常タグだけエスケープやアンダーバー変換を行う。
+        // Wildcard/LoRA/Embedding はプロンプト構文をそのまま保つ。
+        const note = String(result.note || "").toLowerCase();
+        if (result.category !== null && !["wildcard", "lora", "embedding"].includes(note)) {
             value = this.escapeParenteses(value);
             value = this.replaceUnderbarToSpace(value);
         }
 
         return value;
+    }
+
+    applyCategoryPrefix(value, result) {
+        if (!this.isArtistTag(result)) return value;
+
+        const prefix = this.settings.artistPrefix || "";
+        if (!prefix) return value;
+        if (String(value).startsWith(prefix)) return value;
+
+        return prefix + value;
+    }
+
+    isArtistTag(result) {
+        const category = String(result.category || "").toLowerCase();
+        const categoryName = String(result.categoryName || "").toLowerCase();
+        return category === "artist" || categoryName === "artist";
     }
 
 

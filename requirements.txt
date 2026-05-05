@@ -1,1 +1,1 @@
-sqlite3
+# No additional pip dependencies are required beyond ComfyUI itself.

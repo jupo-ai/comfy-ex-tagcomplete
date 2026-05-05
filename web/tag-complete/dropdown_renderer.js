@@ -1,6 +1,24 @@
 import { $el } from "../../../scripts/ui.js";
 import { TagCompleterSettings } from "./tag_completer_settings.js";
 
+const WIKI_SITES = {
+    danbooru: {
+        label: "Danbooru",
+        buildUrl: ({ tag }) => `https://danbooru.donmai.us/wiki_pages/${tag}`,
+    },
+    e621: {
+        label: "e621",
+        buildUrl: ({ tag }) => `https://e621.net/wiki_pages/${tag}`,
+    },
+    gelbooru: {
+        label: "Gelbooru",
+        buildUrl: ({ tag }) => {
+            if (!tag) return null;
+            return `https://gelbooru.com/index.php?page=wiki&s=list&search=${encodeURIComponent(tag)}`;
+        },
+    },
+};
+
 // ==============================================
 // ドロップダウンの描画とDOM操作を担当するクラス
 // ==============================================
@@ -15,7 +33,7 @@ export class DropdownRenderer {
     // ------------------------------------------
     createDropdownItems(searchResults, searchInfo, onItemClick) {
         return searchResults.map(result => {
-            const parts = this.createItemParts(result, searchInfo);
+            const parts = this.createItemParts(result, searchInfo, onItemClick);
             const item = this.createDropdownItem(result, searchInfo, parts, onItemClick);
             return item;
         });
@@ -25,7 +43,7 @@ export class DropdownRenderer {
     // ------------------------------------------
     // アイテムの構成要素を作成
     // ------------------------------------------
-    createItemParts(result, searchInfo) {
+    createItemParts(result, searchInfo, onItemClick) {
         const parts = [];
 
         // カスタムプレフィックス
@@ -46,6 +64,11 @@ export class DropdownRenderer {
             if (wikiLink) {
                 parts.push(wikiLink);
             }
+        }
+
+        // Alias候補では正規タグではなくalias文字列を挿入できるボタンを出す
+        if (result.note === "alias") {
+            parts.push(this.createAliasButton(result, searchInfo, onItemClick));
         }
 
         // テキスト部分
@@ -112,20 +135,44 @@ export class DropdownRenderer {
     // サイトリンク
     // ------------------------------------------
     createWikiLink(result) {
-        if (result.site === null) return null;
+        const site = this.resolveWikiSite(result);
+        if (!site) return null;
 
-        const linkPart = encodeURIComponent(result.value);
-        const baseUrl = result.site === "e621" 
-            ? "https://e621.net/wiki_pages/" 
-            : "https://danbooru.donmai.us/wiki_pages/";
+        const tag = result.value ?? result.term;
+        if (!tag) return null;
+
+        const linkTarget = {
+            tag: String(tag),
+        };
+        const href = site.buildUrl ? site.buildUrl(linkTarget) : null;
+        if (!href) return null;
         
         return $el("a.jupo-tagcomplete-wikiLink", {
             textContent: "🔍", 
-            title: "Open external wiki page for this tag.", 
-            href: baseUrl + linkPart, 
+            title: `Open ${site.label} wiki page for this tag.`,
+            href,
             target: "_blank", 
             rel: "noopener noreferrer", 
-            onclick: (e) => e.stopPropagation(), 
+            onclick: (event) => event.stopPropagation(),
+        });
+    }
+
+    resolveWikiSite(result) {
+        const selectedSite = this.settings.wikiSite || "auto";
+        const siteKey = selectedSite === "auto" ? result.site : selectedSite;
+        if (!siteKey) return null;
+
+        return WIKI_SITES[String(siteKey).toLowerCase()] ?? null;
+    }
+
+    createAliasButton(result, searchInfo, onItemClick) {
+        return $el("button.jupo-tagcomplete-aliasButton", {
+            textContent: "alias",
+            title: "Insert the alias text instead of the canonical tag.",
+            onclick: (event) => {
+                event.stopPropagation();
+                onItemClick?.(event, { ...result, value: result.term }, searchInfo);
+            },
         });
     }
 
@@ -136,7 +183,8 @@ export class DropdownRenderer {
     createTextParts(result, inputTerm) {
         const safeTerm = this.escapeRegExp(inputTerm);
         const regex = new RegExp(`(${safeTerm})`, "gi");
-        const splitText = result.text.split(regex);
+        const displayText = result.display ?? result.text ?? "";
+        const splitText = String(displayText).split(regex);
 
         const container = $el("div.jupo-tagcomplete-text");
 
@@ -163,8 +211,11 @@ export class DropdownRenderer {
         let tag;
         
         // postCountが存在して、空文字でない、かつ数字以外の場合
-        if (postCount && postCount.trim() !== "" && isNaN(postCount)) {
-            tag = postCount.replace(" ", "").toLowerCase();
+        if (result.note) {
+            tag = String(result.note).replace(" ", "").toLowerCase();
+        }
+        else if (postCount && String(postCount).trim() !== "" && isNaN(postCount)) {
+            tag = String(postCount).replace(" ", "").toLowerCase();
         }
         // そうでなければcategoryNameを使用
         else if (categoryName) {
@@ -220,7 +271,7 @@ export class DropdownRenderer {
     // アイテムタイトル
     // ------------------------------------------
     applyItemTitle(element, result) {
-        if (result.categoryName === "Wildcard" && result.wildcardValue) {
+        if ((result.note === "wildcard" || result.categoryName === "Wildcard") && result.wildcardValue) {
             element.title = result.wildcardValue.replace(/,/g, '\n');
         }
     }

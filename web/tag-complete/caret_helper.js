@@ -216,5 +216,7 @@ export class TextAreaCaretHelper {
            console.warn("selectionStart が取得できませんでした");
            this.el.value += value;
        }
+
+       this.el.dispatchEvent(new Event("input", { bubbles: true }));
    }
 }

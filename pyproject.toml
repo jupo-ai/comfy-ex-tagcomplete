@@ -1,9 +1,9 @@
 [project]
 name = "comfy-ex-tagcomplete"
 description = "tag completer with csv file"
-version = "2.0.2"
+version = "3.0.0"
 license = {file = "LICENSE"}
-dependencies = ["sqlite3"]
+dependencies = []
 
 [project.urls]
 Repository = "https://github.com/jupo-ai/comfy-ex-tagcomplete"

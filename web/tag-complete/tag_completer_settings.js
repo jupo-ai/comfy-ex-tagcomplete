@@ -9,7 +9,9 @@ export const TagCompleterSettings = {
     delimiter: ",", 
     addSpace: true,  
     replaceUnderbar: true, 
+    artistPrefix: "",
     wikiLink: true, 
+    wikiSite: "auto",
     delay: 50, 
 }
 

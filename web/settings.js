@@ -1,6 +1,6 @@
 import { app } from "../../scripts/app.js";
 import { mk_name, api_get, api_post } from "./utils.js";
-import { TagCompleter } from "./completer/tag_completer.js";
+import { TagCompleter } from "./tag-complete/tag_completer.js";
 
 // ==============================================
 // 設定オブジェクト
@@ -96,7 +96,7 @@ export const settings = {
         name: "Max Suggestions to Display", 
         id: mk_name("suggestionCount"), 
         type: "slider", 
-        defaultValue: 20, 
+        defaultValue: 50, 
         attrs: { min: 0, max: 200, step: 1 }, 
         tooltip: "0: Show all avaliable suggestion.", 
         onChange: async (value) => {
@@ -115,6 +115,23 @@ export const settings = {
         }, 
     }, 
 
+    wikiSite: {
+        name: "Wiki Link Site",
+        id: mk_name("wikiSite"),
+        type: "combo",
+        defaultValue: "auto",
+        options: [
+            { text: "Auto (tag site)", value: "auto" },
+            { text: "Danbooru", value: "danbooru" },
+            { text: "e621", value: "e621" },
+            { text: "Gelbooru", value: "gelbooru" },
+        ],
+        tooltip: "Choose which site the 🔍 button opens. Auto uses the tag source when available.",
+        onChange: (value) => {
+            TagCompleter.updateSetting("wikiSite", value);
+        },
+    },
+
     replaceUnderbar: {
         name: "Replace '_' with 'Space'", 
         id: mk_name("replaceUnderbar"), 
@@ -124,6 +141,17 @@ export const settings = {
             TagCompleter.updateSetting("replaceUnderbar", value);
         }, 
     }, 
+
+    artistPrefix: {
+        name: "Artist Tag Prefix",
+        id: mk_name("artistPrefix"),
+        type: "string",
+        defaultValue: "",
+        tooltip: "Text added before inserted artist tags. Example: @",
+        onChange: (value) => {
+            TagCompleter.updateSetting("artistPrefix", value);
+        },
+    },
 
     delay: {
         name: "Completion Delay (ms)", 
@@ -166,15 +194,37 @@ export const settings = {
         }, 
     }, 
 
-    restirctAlias: {
+    restrictAlias: {
         name: "Restrict Alias", 
-        id: mk_name("restrict Alias"), 
+        id: mk_name("restrictAlias"), 
         type: "boolean", 
         defaultValue: false, 
-        tooltip: "If enabled, aliases are only sohwn when an exact match is found.", 
+        tooltip: "If enabled, aliases are only shown when an exact match is found.", 
         onChange: async (value) => {
             await api_post("set_restrict_alias", { value: value });
         }, 
     }, 
+
+    searchMethod: {
+        name: "Search Method",
+        id: mk_name("searchMethod"),
+        type: "combo",
+        defaultValue: "smart",
+        options: ["legacy", "smart"],
+        onChange: async (value) => {
+            await api_post("set_search_method", { value: value });
+        },
+    },
+
+    sortMethod: {
+        name: "Sort Method",
+        id: mk_name("sortMethod"),
+        type: "combo",
+        defaultValue: "relevance",
+        options: ["legacy", "relevance"],
+        onChange: async (value) => {
+            await api_post("set_sort_method", { value: value });
+        },
+    },
 
 }

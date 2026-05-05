@@ -5,3 +5,4 @@ custom_nodes_dir = root_dir.parent
 
 tags_dir = root_dir / "tags"
 translate_dir = root_dir / "translate"
+category_map_path = root_dir / "category_map.csv"

@@ -2,7 +2,7 @@ import { app } from "../../scripts/app.js";
 import { ComfyWidgets } from "../../scripts/widgets.js";
 import { mk_name } from "./utils.js";
 import { settings } from "./settings.js";
-import { TagCompleter } from "./completer/tag_completer.js";
+import { TagCompleter } from "./tag-complete/tag_completer.js";
 
 // ==============================================
 // STRINGウィジェットのハイジャック

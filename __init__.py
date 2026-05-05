@@ -1,4 +1,4 @@
-from .py import endpoints
+from .py import routes
 
 
 NODE_CLASS_MAPPINGS = {}
