@@ -1,7 +1,7 @@
 [project]
 name = "comfy-ex-tagcomplete"
 description = "tag completer with csv file"
-version = "3.0.0"
+version = "3.1.0"
 license = {file = "LICENSE"}
 dependencies = []
 
