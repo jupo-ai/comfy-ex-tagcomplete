@@ -104,6 +104,18 @@ export const settings = {
         }, 
     }, 
 
+    minSearchChars: {
+        name: "Minimum Characters to Search",
+        id: mk_name("minSearchChars"),
+        type: "slider",
+        defaultValue: 2,
+        attrs: { min: 0, max: 10, step: 1 },
+        tooltip: "Set to 0 to show category-filtered suggestions immediately, e.g. --artist.",
+        onChange: (value) => {
+            TagCompleter.updateSetting("minSearchChars", value);
+        },
+    },
+
     wikiLink: {
         name: "Add 🔍 Link button", 
         id: mk_name("wikiLink"), 

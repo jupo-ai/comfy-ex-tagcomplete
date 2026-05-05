@@ -238,7 +238,7 @@ export class TagCompleter {
         try {
             const searchInfo = this.getSearchInfo();
 
-            if (!searchInfo || !searchInfo.term) {
+            if (!searchInfo || (!searchInfo.term && !searchInfo.categoryFilters?.length)) {
                 this.dropdownController.hide();
                 return;
             }

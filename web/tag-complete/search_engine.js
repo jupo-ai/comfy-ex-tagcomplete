@@ -52,15 +52,18 @@ export class SearchEngine {
         // 残りの文字列を検索語句として処理
         const searchTerm = remainingTerm.replace(/\s/g, "_").trim();
 
-        // 2文字から検索する
+        const minSearchChars = Math.max(0, Number(this.settings.minSearchChars ?? 2) || 0);
+
+        // 設定された文字数から検索する
         // 日本語（ひらがな、カタカナ、漢字）が含まれるかチェックする正規表現
         const japaneseRegex = /[\u3040-\u30FF\u4E00-\u9FFF]/;
-        if (!japaneseRegex.test(searchTerm) && searchTerm.length < 2) {
+        const canSearchEmptyCategory = minSearchChars === 0 && searchTerm.length === 0 && categoryFilters.length > 0;
+        if (!canSearchEmptyCategory && !japaneseRegex.test(searchTerm) && searchTerm.length < minSearchChars) {
             return null;
         }
 
         return {
-            term: searchTerm || null, 
+            term: searchTerm, 
             customPrefixes: customPrefixes, 
             categoryFilters: categoryFilters, 
             fullTerm: rawTerm, 

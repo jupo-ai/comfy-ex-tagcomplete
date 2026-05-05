@@ -46,6 +46,7 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 | `Delimiter` | タグ挿入時の区切り文字を指定します。`,` `.` `None` から選べます。 |
 | `Add 'Space' after delimiter` | 区切り文字の後ろに半角スペースを自動で入れます。 |
 | `Max Suggestions to Display` | 候補の最大表示数です。`0` にすると全件表示しますが、件数によっては重くなります。 |
+| `Minimum Characters to Search` | 検索を開始する最小文字数です。`0` にすると `--artist` のようなカテゴリ指定だけでも候補を表示できます。 |
 | `Add 🔍 Link button` | 候補の左に Wiki / タグページを開くボタンを表示します。 |
 | `Wiki Link Site` | `🔍` ボタンで開くサイトを選びます。`Auto` はタグ元のサイトを優先します。 |
 | `Replace '_' with 'Space'` | 挿入時に `_` をスペースへ置き換えます。 |
@@ -74,6 +75,7 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 ```
 
 `fate` の検索結果から、`character` カテゴリのものだけを表示します。
+`Minimum Characters to Search` を `0` にすると、`--artist` のようにカテゴリ指定だけで候補を表示できます。
 
 ### プレフィックス
 

@@ -46,6 +46,7 @@ You can configure the behavior from the ComfyUI settings panel.
 | `Delimiter` | Sets the separator used when inserting tags. Choose from `,`, `.`, or `None`. |
 | `Add 'Space' after delimiter` | Automatically inserts a space after the delimiter. |
 | `Max Suggestions to Display` | Sets the maximum number of suggestions to show. `0` shows all results, which may become heavy with large datasets. |
+| `Minimum Characters to Search` | Sets the minimum number of characters before searching. Set it to `0` to show suggestions with only a category filter, e.g. `--artist`. |
 | `Add 🔍 Link button` | Shows a button next to each suggestion that opens the related wiki or tag page. |
 | `Wiki Link Site` | Chooses which site the `🔍` button opens. `Auto` uses the source site of the tag when available. |
 | `Replace '_' with 'Space'` | Replaces `_` with spaces when inserting tags. |
@@ -74,6 +75,7 @@ Example:
 ```
 
 This shows only `character` entries from the results for `fate`.
+Set `Minimum Characters to Search` to `0` to show suggestions with only a category filter such as `--artist`.
 
 ### Prefix
 

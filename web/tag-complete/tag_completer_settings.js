@@ -12,6 +12,7 @@ export const TagCompleterSettings = {
     artistPrefix: "",
     wikiLink: true, 
     wikiSite: "auto",
+    minSearchChars: 2,
     delay: 50, 
 }
 

@@ -324,7 +324,13 @@ class TagDataManager:
             return []
 
         term = (term or "").strip()
-        if not term:
+        raw_filters = []
+        for value in category_filters or []:
+            normalized = (value or "").strip().lower()
+            if normalized:
+                raw_filters.append(normalized)
+
+        if not term and not raw_filters:
             return []
 
         cls.restrict_alias = bool(cls.restrict_alias or cls.restrictAlias)
@@ -335,7 +341,9 @@ class TagDataManager:
         is_smart_search = cls.search_method == "smart"
         is_wildcard_term = term.startswith("__")
 
-        if is_smart_search and not is_wildcard_term:
+        if not term:
+            like_conditions.append("1 = 1")
+        elif is_smart_search and not is_wildcard_term:
             chunks = [chunk for chunk in re.split(r"[_ ]+", term) if chunk]
             if not chunks:
                 return []
@@ -354,12 +362,6 @@ class TagDataManager:
 
             like_conditions.append("term COLLATE NOCASE LIKE ? ESCAPE '\\'")
             like_params.append(pattern)
-
-        raw_filters = []
-        for value in category_filters or []:
-            normalized = (value or "").strip().lower()
-            if normalized:
-                raw_filters.append(normalized)
 
         category_conditions = []
         category_params = []
