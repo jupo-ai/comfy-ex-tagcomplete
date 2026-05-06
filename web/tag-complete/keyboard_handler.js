@@ -92,6 +92,8 @@ export class KeyboardHandler {
     handleEscapeKey(e) {
         this.onHide?.();
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
     }
 
     // --- PageUpキー ---
