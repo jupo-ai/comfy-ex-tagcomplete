@@ -44,7 +44,7 @@ export class TextProcessor {
         // Wildcard/LoRA/Embedding はプロンプト構文をそのまま保つ。
         const note = String(result.note || "").toLowerCase();
         if (result.category !== null && !["wildcard", "lora", "embedding"].includes(note)) {
-            value = this.escapeParenteses(value);
+            value = this.escapeParentheses(value);
             value = this.replaceUnderbarToSpace(value);
         }
 
@@ -87,7 +87,8 @@ export class TextProcessor {
     // ------------------------------------------
     // 括弧をエスケープ
     // ------------------------------------------
-    escapeParenteses(text) {
+    escapeParentheses(text) {
+        if (!this.settings.escapeParentheses) return text;
         return text.replace(/\(/g, "\\(").replace(/\)/g, "\\)");
     }
 

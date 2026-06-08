@@ -154,6 +154,17 @@ export const settings = {
         }, 
     }, 
 
+    escapeParentheses: {
+        name: "Escape Parentheses",
+        id: mk_name("escapeParentheses"),
+        type: "boolean",
+        defaultValue: true,
+        tooltip: "Escape parentheses in inserted tags, e.g. (medium) -> \\(medium\\).",
+        onChange: (value) => {
+            TagCompleter.updateSetting("escapeParentheses", value);
+        },
+    },
+
     artistPrefix: {
         name: "Artist Tag Prefix",
         id: mk_name("artistPrefix"),

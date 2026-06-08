@@ -50,6 +50,7 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 | `Add 🔍 Link button` | 候補の左に Wiki / タグページを開くボタンを表示します。 |
 | `Wiki Link Site` | `🔍` ボタンで開くサイトを選びます。`Auto` はタグ元のサイトを優先します。 |
 | `Replace '_' with 'Space'` | 挿入時に `_` をスペースへ置き換えます。 |
+| `Escape Parentheses` | 挿入時にタグ内の括弧を `\(` `\)` にエスケープします。 |
 | `Artist Tag Prefix` | artist 系タグの前に付ける文字列です。例: `@` |
 | `Completion Delay (ms)` | 入力後、候補を表示するまでの待ち時間です。 |
 | `Enable Embeddings` | Embedding を候補に含めます。`embedding:name` 形式で表示されます。 |

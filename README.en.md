@@ -50,6 +50,7 @@ You can configure the behavior from the ComfyUI settings panel.
 | `Add 🔍 Link button` | Shows a button next to each suggestion that opens the related wiki or tag page. |
 | `Wiki Link Site` | Chooses which site the `🔍` button opens. `Auto` uses the source site of the tag when available. |
 | `Replace '_' with 'Space'` | Replaces `_` with spaces when inserting tags. |
+| `Escape Parentheses` | Escapes parentheses in inserted tags as `\(` and `\)`. |
 | `Artist Tag Prefix` | Adds a prefix before inserted artist tags. Example: `@` |
 | `Completion Delay (ms)` | Wait time before suggestions appear after typing. |
 | `Enable Embeddings` | Includes Embeddings in the suggestion list. They are shown as `embedding:name`. |
